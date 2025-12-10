@@ -22,10 +22,12 @@ db.once("open", () => console.log(`Connected: ${MONGO}`))
 
 app.use(express.json());
 app.use(cors())
+
+// user endpoint
+app.use("/user", userController)
 app.use(requireValidation);
 
-//controllers
-app.use("user", userController)
+// other validated endpoints
 
 
 app.listen(PORT, () => console.log(`The fort scheduling backend is running on port ${PORT}`))
