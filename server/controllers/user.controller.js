@@ -14,31 +14,41 @@ const serverError = (res, error) => {
 };
 
 router.post("/signup", async (req, res) => {
-
   try {
-    const user = new User({
-      name: req.body.name,
-      password: bcrypt.hashSync(req.body.password, 13),
-      email: req.body.email,
-      address: req.body.address,
-      cellphone: req.body.cellphone,
-      joinDate: req.body.joinDate,
-      defaultLeadership: req.body.defaultLeadership,
-      primaryPart: req.body.primaryPart,
-      secondaryPart: req.body.secondaryPart
-    });
+    console.log(req.body);
 
-    const newUser = await user.save();
+    const existingUser = await User.findOne({ email: req.body.email });
 
-    const token = jwt.sign({ id: user._id }, SECRET);
+    if (!existingUser) {
+      const user = new User({
+        role: req.body.role,
+        name: req.body.name,
+        password: bcrypt.hashSync(req.body.password, 13),
+        email: req.body.email,
+        address: req.body.address,
+        cellphone: req.body.cellphone.split("-").join(""),
+        joinDate: req.body.joinDate,
+        defaultLeadership: req.body.defaultLeadership,
+        primaryPart: req.body.primaryPart,
+        secondaryPart: req.body.secondaryPart,
+      });
 
-    // const token = jwt.sign({ id: user._id }, SECRET, { expiresIn: "1 day" });
+      const newUser = await user.save();
 
-    res.status(200).json({
-      user: newUser,
-      message: "Success! User Created!",
-      token,
-    });
+      const token = jwt.sign({ id: user._id }, SECRET);
+
+      // const token = jwt.sign({ id: user._id }, SECRET, { expiresIn: "1 day" });
+
+      res.status(200).json({
+        user: newUser,
+        message: "Success! User Created!",
+        token,
+      });
+    } else {
+      res.status(409).json({
+        message: "User Already Exists!",
+      });
+    }
   } catch (err) {
     res.status(500).json({
       message: err.message,
@@ -51,9 +61,8 @@ router.post("/signup", async (req, res) => {
 */
 
 router.post("/login", async (req, res) => {
-  console.log("logging in...")
+  console.log("logging in...");
   try {
-
     const { email, password } = req.body;
 
     const user = await User.findOne({ email: email });
@@ -105,35 +114,35 @@ router.get("/find", requireValidation, async (req, res) => {
 
 router.patch("/update:id", requireValidation, async (req, res) => {
   try {
-    const {id} = req.params;
-    console.log(id)
+    const { id } = req.params;
+    console.log(id);
 
     const update = req.body;
-    console.log(update)
-    
+    console.log(update);
+
     const findUser = await User.findOne({ _id: id });
 
     if (!findUser) {
       res.status(404).json({
-        message: `User Not Found.`
-      })
+        message: `User Not Found.`,
+      });
     }
 
-    const updatedUser = await User.findOneAndUpdate({_id: id}, update)
-    
-    console.log(updatedUser)
+    const updatedUser = await User.findOneAndUpdate({ _id: id }, update);
+
+    console.log(updatedUser);
 
     updatedUser
       ? res.status(200).json({
-        message: `User has been updated successfully.`,
-        updatedUser
-      })
+          message: `User has been updated successfully.`,
+          updatedUser,
+        })
       : res.status(520).json({
-        message: "Unable to update user."
-      })
+          message: "Unable to update user.",
+        });
   } catch (err) {
     serverError(res, err);
   }
-})
+});
 
 module.exports = router;

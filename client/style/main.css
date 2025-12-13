@@ -1,0 +1,118 @@
+html{
+    scroll-behavior: smooth;
+}
+body {
+  margin: 0;
+      color: rgb(68, 68, 68);
+}
+
+label {
+    font-weight: bold;
+}
+
+/* Login Section */
+#loginForm{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#userEmailField{
+    margin-bottom: 1rem;
+}
+
+#addressSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#loginSubmitBtn{
+    margin-top: 1rem;
+}
+
+#signupButton{
+    margin-top: 2rem;
+}
+
+
+/* Signup Section */
+#signupForm {
+  display: flex;
+  overflow-x: hidden;
+  min-width: 100vw;
+}
+
+#signupForm > form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 100vw;
+  margin: 0;
+  padding: 0;
+}
+
+#passwordSection{
+    text-align: center;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* New User Confirmation Section */
+
+#confirmationSection{
+    height: 80vh;
+}
+#confirmationSectionHeader{
+    text-align: center;
+}
+
+#confirmationSection {
+    display: flex;
+    flex-direction: column;
+    margin: 1rem;
+    border: 2px solid red;
+    /* padding: 1rem; */
+    border-radius: 1rem;
+    width: 80vw;
+    /* height: fit-content; */
+    /* max-height: 12.5em; */
+    /* aspect-ratio: 4/3; */
+    margin: auto;
+    padding: 1em;
+}
+
+#confirmationSection > div{
+    display: grid;
+    grid-template-columns: 20% 60% 20%;
+    border: 1px solid black;
+    align-items: center;
+}
+
+#confirmationSection > div *{
+font-size: clamp(8px, .7rem, 2rem);
+}
+
+#confirmationSection > div:nth-child(even) {
+    background-color: rgb(151, 233, 151);
+}
+
+#confirmationSection > div > div, #confirmationSection > div > input {
+    text-align: center;
+}
+
+#confirmationSection > button {
+    width: fit-content;
+    align-self: center;
+    margin-top: 1rem;
+    text-align: center;
+}
+
+#submitEditUserBtn{
+    font-size: clamp(8px, .5rem, 2rem)!important;
+    /* color: red; */
+    /* background-color: blue; */
+    /* padding: 1rem; */
+    height: 1.1rem;
+}
