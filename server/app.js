@@ -5,7 +5,7 @@ const PORT = process.env.PORT;
 
 //controllers
 const userController = require("./controllers/user.controller")
-// const eventsController = require("./controllers/")
+const eventsController = require("./controllers/events.controller")
 
 //middleware
 const requireValidation = require("./middleware/validate-session")
@@ -25,9 +25,9 @@ app.use(cors())
 
 // user endpoint
 app.use("/user", userController)
-app.use(requireValidation);
+app.use(requireValidation)
 
 // other validated endpoints
-
+app.use("/events", eventsController)
 
 app.listen(PORT, () => console.log(`The fort scheduling backend is running on port ${PORT}`))

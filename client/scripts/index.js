@@ -1,9 +1,15 @@
 import { buildSignUpSection } from "./components/loginOrSignUp/buildSignUpSection.js";
 import { handleLogin } from "./components/loginOrSignUp/handleLogin.js";
+import { logInWithToken } from "./components/loginOrSignUp/logInWithToken.js";
 
-const serverURL = "http://127.0.0.1:4041"
+const serverURL = "http://127.0.0.1:4041";
 const loginForm = document.getElementById("loginForm");
-const signupButton = document.getElementById("signupButton")
+const signupButton = document.getElementById("signupButton");
+
+if (sessionStorage.token) {
+  console.log("token", sessionStorage.token);
+  logInWithToken(serverURL);
+}
 
 loginForm.addEventListener("submit", (e) => {
   const email = loginForm.userEmailField.value;
@@ -14,7 +20,6 @@ loginForm.addEventListener("submit", (e) => {
 });
 
 signupButton.addEventListener("click", (e) => {
-    e.preventDefault()
-    buildSignUpSection(serverURL)
-})
-
+  e.preventDefault();
+  buildSignUpSection(serverURL);
+});

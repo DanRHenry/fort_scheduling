@@ -89,6 +89,27 @@ router.post("/login", async (req, res) => {
   }
 });
 
+/* ---------------------- Auto Log in with Token
+
+*/
+
+router.get("/getbytoken:token", async (req, res) => {
+  try {
+    const decodedToken = jwt.verify(req.params.token, process.env.JWT);
+
+    const user = await User.findById(decodedToken.id);
+    !user
+      ? res.status(404).json({
+          message: "User not found.",
+        })
+      : res.status(200).json({
+          message: "Found User!",
+          user,
+        });
+  } catch (err) {
+    serverError(err);
+  }
+});
 /* 
 ----------------------------- Find User Endpoint ------------------------
 */
