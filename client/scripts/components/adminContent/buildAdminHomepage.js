@@ -1,6 +1,8 @@
-import {handleSubmitNewEvent} from "./submit_functions/handleSubmitNewEvent.js"
+import { handleSubmitNewEvent } from "./fetches/handleSubmitNewEvent.js";
+import { getAllEvents } from "./fetches/getAllEvents.js";
+import { openEvent } from "./openEvent.js";
 
-export function buildAdminHomepage(serverURL, data) {
+export async function buildAdminHomepage(serverURL, data) {
   console.log("admin page");
   console.table(data);
 
@@ -39,25 +41,23 @@ export function buildAdminHomepage(serverURL, data) {
   startAndEndFormSubmitBtn.type = "submit";
   startAndEndFormSubmitBtn.addEventListener("click", (e) => {
     e.preventDefault();
-    console.log("submitting");
-    console.log(calendarStartDateField.value);
-    console.log(calendarEndDateField.value);
-    console.log(eventNameField.value)
 
     handleSubmitNewEvent(serverURL, {
-        name: eventNameField.value,
-        dates: {
-            startDate: calendarStartDateField.value,
-            endDate: calendarEndDateField.value,
-        },
-        admins: [],
-        singerAvailability: [],
-        dailySchedules: [],
-        songList: []
-    })
+      name: eventNameField.value,
+      adminEmail: data.user.email,
+      adminID: data.user._id,
+      dates: {
+        startDate: calendarStartDateField.value,
+        endDate: calendarEndDateField.value,
+      },
+      singerAvailability: [],
+      dailySchedules: [],
+      songList: [],
+    });
   });
 
-  const eventStarter = document.createElement("div");
+  const newEventInputForm = document.createElement("div");
+  newEventInputForm.id = "newEventInputForm";
 
   startAndEndForm.append(
     calendarStartDateFieldLabel,
@@ -76,7 +76,7 @@ export function buildAdminHomepage(serverURL, data) {
   eventNameField.id = "eventNameField";
   eventNameField.name = "eventNameField";
 
-  eventStarter.append(eventNameLabel, eventNameField, startAndEndForm);
+  newEventInputForm.append(eventNameLabel, eventNameField, startAndEndForm);
 
   const logoutBtn = document.createElement("button");
   logoutBtn.innerText = "Log Out";
@@ -85,8 +85,51 @@ export function buildAdminHomepage(serverURL, data) {
     window.location.reload();
   });
 
-  body.append(logoutBtn, eventStarter);
+  body.append(logoutBtn, newEventInputForm);
 
+  const eventData = await getAllEvents(serverURL, sessionStorage.token);
+
+  console.log(eventData.events);
+
+  const eventTable = document.createElement("table");
+  eventTable.id = "eventTable";
+  const eventHeaderLine = document.createElement("tr");
+
+  const eventName = document.createElement("th");
+  eventName.innerText = "Name";
+  const eventStartDate = document.createElement("th");
+  eventStartDate.innerText = "Start";
+  const eventEndDate = document.createElement("th");
+  eventEndDate.innerText = "End";
+
+  eventHeaderLine.append(eventName, eventStartDate, eventEndDate);
+  eventTable.append(eventHeaderLine);
+
+  for (let i = 0; i < eventData.events.length; i++) {
+    const event = eventData.events[i];
+
+    const eventRow = document.createElement("tr");
+    eventRow.className = "events";
+
+    const eventName = document.createElement("td");
+    eventName.innerText = event.name;
+
+    const start = document.createElement("td");
+    start.innerText = event.dates.startDate;
+
+    const end = document.createElement("td");
+    end.innerText = event.dates.endDate;
+
+    eventRow.append(eventName, start, end);
+
+    eventRow.addEventListener("click", () => {
+        openEvent(event)
+    })
+
+    eventTable.append(eventRow);
+  }
+
+  body.append(eventTable);
 }
 
 /* 

@@ -5,9 +5,17 @@ const EventsSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    admins: {
-        type: Array,
+    adminID: {
+        type: String,
         required: true
+    },
+    adminEmail: {
+        type: String,
+        required: true
+    },
+    created: {
+        type: String,
+        required: true,
     },
     dates: {
         type: Object,

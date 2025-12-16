@@ -1,5 +1,8 @@
 const router = require("express").Router();
 const Events = require("../models/events.model");
+const jwt = require("jsonwebtoken");
+const SECRET = process.env.JWT;
+
 
 const serverError = (res, error) => {
   console.log("Server-side error", error.message);
@@ -12,12 +15,14 @@ const serverError = (res, error) => {
 router.post("/create", async (req, res) => {
   
   try {
-    const { name, admins, dates, singerAvailility, dailySchedules, songList } =
+    const { name, adminEmail, adminID, dates, singerAvailility, dailySchedules, songList } =
       req.body;
 
     const event = new Events({
         name: name,
-        admins: admins,
+        adminEmail: adminEmail,
+        adminID: adminID,
+        created: new Date(),
         dates: dates,
         singerAvailability: singerAvailility,
         dailySchedules: dailySchedules,
@@ -35,6 +40,25 @@ router.post("/create", async (req, res) => {
   }
 });
 
+router.get("/getallbyadmin:token", async (req, res) => {
+  try{
+    const decodedToken = jwt.verify(req.params.token, SECRET)
+    const events = await Events.find({adminID: decodedToken.id})
+
+!events
+    // !adminsEntries.includes(decodedToken.id)
+      ? res.status(404).json({
+        message: "No entries found!",
+      })
+      : res.status(200).json({
+        message: "Entries Found!",
+        events,
+      })
+  } catch (err) {
+    console.error(err)
+    // serverError(err)
+  }
+})
 // !========================================================
 
 // used

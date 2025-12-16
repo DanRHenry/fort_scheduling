@@ -95,7 +95,7 @@ router.post("/login", async (req, res) => {
 
 router.get("/getbytoken:token", async (req, res) => {
   try {
-    const decodedToken = jwt.verify(req.params.token, process.env.JWT);
+    const decodedToken = jwt.verify(req.params.token, SECRET);
 
     const user = await User.findById(decodedToken.id);
     !user
