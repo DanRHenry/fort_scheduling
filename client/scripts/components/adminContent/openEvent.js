@@ -1,4 +1,10 @@
-export async function openEvent(eventData) {
+import { closeEvent } from "./closeEvent.js";
+
+export async function openEvent(eventData, eventRow, handleOpenEvent, handleCloseEvent) {
+    eventRow.removeEventListener("click", handleOpenEvent)
+    eventRow.addEventListener("click", handleCloseEvent)
+
+
   console.log("event data: ", eventData);
 
   const backPanel = document.createElement("div");
@@ -45,23 +51,42 @@ export async function openEvent(eventData) {
   const start = new Date(startYear, startMonth, startDate);
 
   let current = new Date(startYear, startMonth, startDate);
+  let next = new Date(startYear, startMonth, startDate);
   let startingDay = start.getDay();
 
   let index = 0;
-  while (current < end) {
+
+  while (current <= end) {
     const block = document.createElement("div");
     block.className = "blocks";
+
     if (index - startingDay > -6) {
       calendar.append(block);
-    //   if (index - startingDay > 0) {
-        block.innerText = current.getDate();
+    }
+
+    if (index - startingDay > 0) {
+      if (current.getDate() === 1) {
+        block.innerText = `${
+          months[current.getMonth()]
+        }\n ${current.getDate()}`;
+      } else {
+        block.innerText = `${current.getDate()}`;
       }
-    // }
-    console.log(index)
-    console.log("current: ",current)
-    console.log("end: ",end)
+    }
+
     index++;
-    current.setDate(current.getDate()+1)
+
+    if (index - startingDay > 1) {
+      current.setDate(current.getDate() + 1);
+      next.setDate(next.getDate() + 1);
+
+      if (current.getMonth() < next.getMonth()) {
+        index = 0;
+        console.log(current.getMonth(), " and ", next.getMonth());
+        index = 0;
+        startingDay = 0;
+      }
+    }
   }
 
   // for (let i = 0-startingDay; i-startingDay <= 30; i++) {

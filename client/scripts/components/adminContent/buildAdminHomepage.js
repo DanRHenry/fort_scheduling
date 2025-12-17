@@ -1,6 +1,7 @@
 import { handleSubmitNewEvent } from "./fetches/handleSubmitNewEvent.js";
 import { getAllEvents } from "./fetches/getAllEvents.js";
 import { openEvent } from "./openEvent.js";
+import { closeEvent } from "./closeEvent.js";
 
 export async function buildAdminHomepage(serverURL, data) {
   console.log("admin page");
@@ -122,9 +123,15 @@ export async function buildAdminHomepage(serverURL, data) {
 
     eventRow.append(eventName, start, end);
 
-    eventRow.addEventListener("click", () => {
-        openEvent(event)
-    })
+    eventRow.addEventListener("click", handleOpenEvent)
+
+    function handleOpenEvent() {
+        openEvent(event, eventRow, handleOpenEvent, handleCloseEvent)
+    }
+
+    function handleCloseEvent() {
+        closeEvent(eventData, eventRow, handleOpenEvent, handleCloseEvent)
+    }
 
     eventTable.append(eventRow);
   }

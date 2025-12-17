@@ -165,6 +165,17 @@ font-size: clamp(8px, .7rem, 2rem);
 
 .blocks{
     border: 1px solid red;
-    height: 2rem;
+    height: 3rem;
+    cursor: pointer;
     /* background-color: black; */
+    user-select: none;
+}
+
+.blocks:hover {
+    background-color: green;
+    color: white;
+}
+
+.blocks:active{
+    background-color: rgb(1, 99, 1);
 }
