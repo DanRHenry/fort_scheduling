@@ -1,17 +1,18 @@
 import { closeEvent } from "./closeEvent.js";
+import { openDate } from "./openDate.js";
 
-export async function openEvent(eventData, eventRow, handleOpenEvent, handleCloseEvent) {
+export async function openEvent(eventData, eventRow, handleOpenEvent, handleCloseEvent, serverURL) {
     eventRow.removeEventListener("click", handleOpenEvent)
     eventRow.addEventListener("click", handleCloseEvent)
 
 
-  console.log("event data: ", eventData);
+  // console.log("event data: ", eventData);
 
-  const backPanel = document.createElement("div");
-  backPanel.id = "backPanel";
+//   const backPanel = document.createElement("div");
+//   backPanel.id = "backPanel";
 
   const eventWindow = document.createElement("div");
-  eventWindow.id = "eventWindow";
+  eventWindow.id = `eventWindow_${eventData._id}`;
 
   const calendar = document.createElement("div");
   calendar.id = "calendar";
@@ -38,7 +39,7 @@ export async function openEvent(eventData, eventRow, handleOpenEvent, handleClos
   let startMonth = +startDates[1];
   startMonth--;
 
-  console.log(months[startMonth]);
+//   console.log(months[startMonth]);
 
   const endDates = eventData.dates.endDate.split("-");
   const endYear = endDates[0];
@@ -59,6 +60,11 @@ export async function openEvent(eventData, eventRow, handleOpenEvent, handleClos
   while (current <= end) {
     const block = document.createElement("div");
     block.className = "blocks";
+    block.addEventListener("click", handleOpenDate)
+
+    function handleOpenDate() {
+        openDate(serverURL, eventData)
+    }
 
     if (index - startingDay > -6) {
       calendar.append(block);
@@ -82,7 +88,7 @@ export async function openEvent(eventData, eventRow, handleOpenEvent, handleClos
 
       if (current.getMonth() < next.getMonth()) {
         index = 0;
-        console.log(current.getMonth(), " and ", next.getMonth());
+        // console.log(current.getMonth(), " and ", next.getMonth());
         index = 0;
         startingDay = 0;
       }
@@ -103,6 +109,6 @@ export async function openEvent(eventData, eventRow, handleOpenEvent, handleClos
 
   eventWindow.append(calendar);
 
-  console.log("startDates: ", startDates);
-  document.getElementsByTagName("body")[0].append(eventWindow, backPanel);
+//   console.log("startDates: ", startDates);
+  document.getElementsByTagName("body")[0].append(eventWindow);
 }

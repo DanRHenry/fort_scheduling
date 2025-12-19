@@ -4,5 +4,5 @@ export function closeEvent(eventData, eventRow, handleOpenEvent, handleCloseEven
     eventRow.addEventListener("click", handleOpenEvent)
 
     document.getElementById("eventWindow")?.remove()
-    document.getElementById("backPanel")?.remove()
+    // document.getElementById("backPanel")?.remove()
 }

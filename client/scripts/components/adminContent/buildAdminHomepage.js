@@ -1,11 +1,10 @@
 import { handleSubmitNewEvent } from "./fetches/handleSubmitNewEvent.js";
 import { getAllEvents } from "./fetches/getAllEvents.js";
-import { openEvent } from "./openEvent.js";
-import { closeEvent } from "./closeEvent.js";
+import { buildEvent } from "./buildEvent.js";
 
 export async function buildAdminHomepage(serverURL, data) {
-  console.log("admin page");
-  console.table(data);
+//   console.log("admin page");
+//   console.table(data);
 
   const body = document.querySelector("body");
   body.replaceChildren();
@@ -42,7 +41,10 @@ export async function buildAdminHomepage(serverURL, data) {
   startAndEndFormSubmitBtn.type = "submit";
   startAndEndFormSubmitBtn.addEventListener("click", (e) => {
     e.preventDefault();
-
+    if (!eventNameField.value) {
+      alert("Enter Event Name");
+      return;
+    }
     handleSubmitNewEvent(serverURL, {
       name: eventNameField.value,
       adminEmail: data.user.email,
@@ -76,6 +78,7 @@ export async function buildAdminHomepage(serverURL, data) {
   eventNameField.placeholder = "enter name of event";
   eventNameField.id = "eventNameField";
   eventNameField.name = "eventNameField";
+  eventNameField.setAttribute("required", true);
 
   newEventInputForm.append(eventNameLabel, eventNameField, startAndEndForm);
 
@@ -90,7 +93,7 @@ export async function buildAdminHomepage(serverURL, data) {
 
   const eventData = await getAllEvents(serverURL, sessionStorage.token);
 
-  console.log(eventData.events);
+//   console.log(eventData.events);
 
   const eventTable = document.createElement("table");
   eventTable.id = "eventTable";
@@ -103,40 +106,25 @@ export async function buildAdminHomepage(serverURL, data) {
   const eventEndDate = document.createElement("th");
   eventEndDate.innerText = "End";
 
+
   eventHeaderLine.append(eventName, eventStartDate, eventEndDate);
   eventTable.append(eventHeaderLine);
 
+  const deleteTable = document.createElement("table")
+  deleteTable.id = "deleteTable"
+  const deleteHeaderRow = document.createElement("tr")
+  const deleteHeader = document.createElement("th")
+  deleteHeader.innerText = "Delete"
+
+  deleteHeaderRow.append(deleteHeader)
+  deleteTable.append(deleteHeaderRow)
+
+  body.append(eventTable, deleteTable);
+
   for (let i = 0; i < eventData.events.length; i++) {
     const event = eventData.events[i];
-
-    const eventRow = document.createElement("tr");
-    eventRow.className = "events";
-
-    const eventName = document.createElement("td");
-    eventName.innerText = event.name;
-
-    const start = document.createElement("td");
-    start.innerText = event.dates.startDate;
-
-    const end = document.createElement("td");
-    end.innerText = event.dates.endDate;
-
-    eventRow.append(eventName, start, end);
-
-    eventRow.addEventListener("click", handleOpenEvent)
-
-    function handleOpenEvent() {
-        openEvent(event, eventRow, handleOpenEvent, handleCloseEvent)
-    }
-
-    function handleCloseEvent() {
-        closeEvent(eventData, eventRow, handleOpenEvent, handleCloseEvent)
-    }
-
-    eventTable.append(eventRow);
+    buildEvent(event, eventData, serverURL);
   }
-
-  body.append(eventTable);
 }
 
 /* 

@@ -59,6 +59,32 @@ router.get("/getallbyadmin:token", async (req, res) => {
     // serverError(err)
   }
 })
+
+//!Delete a DailyMeals Entry
+
+router.delete("/delete:eventID", async (req, res) => {
+  try {
+    const { eventID } = req.params;
+
+
+    console.log("deleting this: ",eventID)
+
+    const deleteEventItem = await Events.deleteOne({
+      _id: eventID,
+    });
+
+    deleteEventItem.deletedCount === 1
+      ? res.status(200).json({
+          message: "Event entry was deleted.",
+        })
+      : res.status(404).json({
+          message: "Entry entry was not found or deleted.",
+        });
+  } catch (err) {
+    serverError(err);
+  }
+
+});
 // !========================================================
 
 // used

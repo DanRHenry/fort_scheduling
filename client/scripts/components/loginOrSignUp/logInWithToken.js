@@ -18,7 +18,7 @@ export async function logInWithToken(serverURL) {
         ? buildAdminHomepage(serverURL, data)
         : buildUserHomepage();
     }
-    console.log(data);
+    // console.log(data);
   } catch (err) {
     console.error(err);
   }

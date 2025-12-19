@@ -121,14 +121,27 @@ font-size: clamp(8px, .7rem, 2rem);
 /* Administration Page */
 
 #eventTable{
-    width: 100%;
+    display: inline;
+    width: 80%;
+    max-width: 80%;
     text-align: center;
     user-select: none;
     cursor: pointer;
 }
 
+#deleteTable {
+    display: inline;
+    width: 20%;
+    max-width: 20%;
+}
+
+.deleteRows{
+    text-align: center;
+}
+
 .events:nth-child(even) {
     background-color: green;
+    /* background-color: rgb(204, 174, 3); */
     color: rgb(223, 223, 223);
 }
 
@@ -179,3 +192,14 @@ font-size: clamp(8px, .7rem, 2rem);
 .blocks:active{
     background-color: rgb(1, 99, 1);
 }
+
+#dateWindow{
+    position: absolute;
+    /* position: fixed; */
+    top: 0;
+    /* z-index: -1; */
+    width: 100vw;
+    height: 100vh;
+    background-color: white;
+}
+

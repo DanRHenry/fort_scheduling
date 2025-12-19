@@ -1,3 +1,5 @@
+import { buildEvent } from "../buildEvent.js";
+
 export async function handleSubmitNewEvent(serverURL, eventBody) {
   try {
     const URL = `${serverURL}/events/create`;
@@ -16,6 +18,9 @@ export async function handleSubmitNewEvent(serverURL, eventBody) {
 
     const data = await res.json();
 
+    if (data.message === "Success! New Event Entry Created!") {
+      buildEvent(data.newEvent, [data.newEvent])
+    }
     console.log("data: ", data);
   } catch (err) {
     console.error(err);
