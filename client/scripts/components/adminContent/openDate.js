@@ -158,14 +158,14 @@ export async function openDate(serverURL, eventData) {
 
   const newSingerEntry = document.createElement("select");
 
-  const startTimeOptions = [];
-  const endTimeOptions = [];
+  const startTimeOptions = ["12:00","12:15","12:30","12:45"];
+  const endTimeOptions = ["12:15","12:30","12:45"];
   const quarterHours = ["00", "15", "30", "45"];
   let j = 1;
-  for (let i = 1; i < 34; i++) {
+  for (let i = 1; i < 38; i++) {
     startTimeOptions.push(`${j % 12}:${quarterHours[(i - 1) % 4]}`);
-    endTimeOptions.push(`${j % 12}:${quarterHours[(i - 1) % 4]}`);
-
+    console.log((i-1) % 4)
+      endTimeOptions.push(`${j % 12}:${quarterHours[(i - 1) % 4]}`);
     if (i % 4 === 0) {
       j++;
     }
@@ -176,9 +176,12 @@ export async function openDate(serverURL, eventData) {
   for (let i = 0; i < startTimeOptions.length; i++) {
     const startTimeOption = document.createElement("option");
     startTimeOption.innerText = `${startTimeOptions[i]}`;
+    newStartTimeEntry.append(startTimeOption);
+  }
+
+  for (let i = 0; i < endTimeOptions.length; i++) {
     const endTimeOption = document.createElement("option");
     endTimeOption.innerText = `${endTimeOptions[i]}`;
-    newStartTimeEntry.append(startTimeOption);
     newEndTimeEntry.append(endTimeOption);
   }
 
