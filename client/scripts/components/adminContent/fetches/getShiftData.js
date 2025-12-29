@@ -1,8 +1,7 @@
-export async function getAllEvents(serverURL) {
-  try {
-    const URL = `${serverURL}/events/getallbyadmin${sessionStorage.token}`;
+export async function getShiftData(serverURL) {
+    try{
 
-    // console.log("URL: ",URL)
+        const URL = `${serverURL}/events/getallshiftdata${sessionStorage.token}`
 
     const res = await fetch(URL, {
       method: "GET",
@@ -15,7 +14,8 @@ export async function getAllEvents(serverURL) {
 
     const data = await res.json();
     return data
-  } catch (err) {
-    console.error(err);
-  }
+
+}catch(err) {
+        console.error(err)
+    }
 }

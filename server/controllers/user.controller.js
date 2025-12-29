@@ -83,7 +83,7 @@ router.post("/login", async (req, res) => {
       token,
     });
   } catch (err) {
-    console.log("err res.message: ", res.message);
+    // console.log("err res.message: ", res.message);
     console.log("err: ", err);
     serverError(res, err);
   }
@@ -95,7 +95,10 @@ router.post("/login", async (req, res) => {
 
 router.get("/getbytoken:token", async (req, res) => {
   try {
+    console.log("logging in with existing token...")
     const decodedToken = jwt.verify(req.params.token, SECRET);
+
+    console.log("decodedToken: ",decodedToken)
 
     const user = await User.findById(decodedToken.id);
     !user
@@ -107,7 +110,8 @@ router.get("/getbytoken:token", async (req, res) => {
           user,
         });
   } catch (err) {
-    serverError(err);
+    console.error(err)
+    // serverError(err);
   }
 });
 /* 

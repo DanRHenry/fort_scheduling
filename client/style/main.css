@@ -203,3 +203,10 @@ font-size: clamp(8px, .7rem, 2rem);
     background-color: white;
 }
 
+/* Singer Information Window */
+
+#singerInformationWindow{
+    height: 100%;
+    width: 100%;
+    background-color: white;
+}

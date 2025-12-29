@@ -30,7 +30,7 @@ export async function handleLogin(serverURL, email, password) {
       }
       else if (data.user.role === "singer") {
         sessionStorage.token = data.token
-        buildUserHomepage(data)
+        buildUserHomepage(data, serverURL)
       }
     }
   } catch (err) {

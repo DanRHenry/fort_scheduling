@@ -16,7 +16,7 @@ export async function logInWithToken(serverURL) {
     if (data.message === "Found User!") {
       data.user.role === "admin"
         ? buildAdminHomepage(serverURL, data)
-        : buildUserHomepage();
+        : buildUserHomepage(data, serverURL);
     }
     // console.log(data);
   } catch (err) {

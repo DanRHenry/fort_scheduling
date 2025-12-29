@@ -1,24 +1,18 @@
-export async function openDate(serverURL, eventData) {
-  console.log("opening date");
-  console.log("event data: ", eventData);
+import { openSingerInformation } from "./openDateFunctions/openSingerInformation.js";
+import { createShift } from "./fetches/createShift.js";
+import { getShiftData } from "./fetches/getShiftData.js";
+import { buildShiftContent } from "./buildShiftContent.js";
 
-  eventData.singerAvailability = [
-    {
-      name: "1st singer Name",
-      primary: "1st prim part",
-      secondary: "1st sec part",
-      phone: "cellNumberHere",
-      _id: "12345"
-    },
-    {
-      name: "2nd singer Name",
-      primary: "2nd prim part",
-      secondary: "2nd sec part",
-      phone: "cellNumberHere",
-      _id: "54321"
-    },
-  ];
-  const schedule = eventData.dailySchedules;
+export async function openDate(serverURL, eventData, currentDate) {
+  // console.log("opening date");
+  console.log("currentDate: ", currentDate)
+
+  // const shiftData = await getShiftData(serverURL)
+
+  console.log("eventData: ", eventData);
+  // console.log("shiftData: ",shiftData)
+  // console.log("currentDate: ",currentDate)
+  // const schedule = eventData.dailySchedules;
 
   const dateWindow = document.createElement("div");
   dateWindow.id = "dateWindow";
@@ -42,6 +36,21 @@ export async function openDate(serverURL, eventData) {
     dateWindow.style.backgroundColor =
       colorsList[groupNameSelection.value].backgroundColor;
     dateWindow.style.color = colorsList[groupNameSelection.value].fontColor;
+
+      for (let shift in eventData.events[0].dailySchedules) {
+    // console.log(eventData.events[0].dailySchedules[shift]);
+
+    if (eventData.events[0].dailySchedules[shift] !== "empty") {
+      if (eventData.events[0].dailySchedules[shift].date == currentDate) {
+      buildShiftContent(
+        eventData.events[0].dailySchedules[shift].startTime,
+        eventData.events[0].dailySchedules[shift].endTime,
+        eventData.events[0],
+        groupNameSelection.value
+      );
+    }
+    }
+  }
   });
 
   const goldOption = document.createElement("option");
@@ -68,7 +77,8 @@ export async function openDate(serverURL, eventData) {
   const voicePartHeader = document.createElement("th");
   voicePartHeader.innerText = "Part";
 
-  const newTimeEntryRow = document.createElement("tr");
+  const newShiftEntryRow = document.createElement("tr");
+  newShiftEntryRow.id = "newShiftEntryRow";
 
   const newStartTimeEntryLabel = document.createElement("td");
   newStartTimeEntryLabel.innerText = "Start: ";
@@ -86,92 +96,34 @@ export async function openDate(serverURL, eventData) {
 
   const newTimeEntrySubmitBtn = document.createElement("button");
   newTimeEntrySubmitBtn.innerText = "+";
-  newTimeEntrySubmitBtn.addEventListener("click", () => {
-    const startTime = newStartTimeEntry.value;
-    const endTime = newEndTimeEntry.value;
+  newTimeEntrySubmitBtn.id = "newTimeEntrySubmitBtn";
+  newTimeEntrySubmitBtn.addEventListener(
+    "click",
+    handleNewTimeEntrySubmitBtnClick
+  );
 
-    const inputSingersRow = document.createElement("tr");
-    const time = document.createElement("td");
-    time.innerText = `${startTime}-${endTime}`;
-
-    const addSingerField = document.createElement("select");
-    addSingerField.id = "addSingerField";
-
-    let changeSingerDisplay;
-
-    const singerPrimaryVoice = document.createElement("td");
-    singerPrimaryVoice.id = "singerPrimaryVoice";
-    const singerSecondaryVoice = document.createElement("td");
-    singerSecondaryVoice.id = "singerSecondaryVoice";
-
-    addSingerField.addEventListener("change", function () {
-      changeSingerDisplay(this);
-    });
-
-    for (let i = 0; i < eventData.singerAvailability.length; i++) {
-
-      const singersInformation = eventData.singerAvailability
-
-      const singerEntry = singersInformation[i];
-
-      const singer = document.createElement("option");
-      singer.id = singerEntry._id;
-      singer.innerText = singerEntry.name;
-
-      changeSingerDisplay = function () {
-
-        const selectedSinger = Array.from(addSingerField.options).filter(option => option.selected)
-
-        const id = selectedSinger[0].id
-        const selected = singersInformation.filter(singer => singer._id === id)
-
-        singerPrimaryVoice.innerText = selected[0].primary;
-        singerSecondaryVoice.innerText = selected[0].secondary;
-      };
-
-      addSingerField.append(singer);
-    }
-
-    const selectVoicePart = document.createElement("select");
-    selectVoicePart.id = "selectVoicePart";
-
-    const sop = document.createElement("option");
-    sop.innerText = "soprano";
-    const alt = document.createElement("option");
-    alt.innerText = "alto";
-    const ten = document.createElement("option");
-    ten.innerText = "tenor";
-    const bass = document.createElement("option");
-    bass.innerText = "bass";
-
-    selectVoicePart.append(sop, alt, ten, bass);
-
-    inputSingersRow.append(
-      time,
-      addSingerField,
-      selectVoicePart,
-      singerPrimaryVoice,
-      singerSecondaryVoice
+  // console.log("eventData: ",eventData)
+  function handleNewTimeEntrySubmitBtnClick() {
+    createShift(
+      document.getElementById("newStartTimeEntry").value,
+      document.getElementById("newEndTimeEntry").value,
+      currentDate,
+      eventData,
+      serverURL
     );
-    shiftTable.append(inputSingersRow);
-  });
+  }
 
-  const newSingerEntry = document.createElement("select");
-
-  const startTimeOptions = ["12:00","12:15","12:30","12:45"];
-  const endTimeOptions = ["12:15","12:30","12:45"];
+  const startTimeOptions = ["12:00", "12:15", "12:30", "12:45"];
+  const endTimeOptions = ["12:15", "12:30", "12:45"];
   const quarterHours = ["00", "15", "30", "45"];
   let j = 1;
   for (let i = 1; i < 38; i++) {
     startTimeOptions.push(`${j % 12}:${quarterHours[(i - 1) % 4]}`);
-    console.log((i-1) % 4)
-      endTimeOptions.push(`${j % 12}:${quarterHours[(i - 1) % 4]}`);
+    endTimeOptions.push(`${j % 12}:${quarterHours[(i - 1) % 4]}`);
     if (i % 4 === 0) {
       j++;
     }
   }
-
-  //   console.log(startTimeOptions)
 
   for (let i = 0; i < startTimeOptions.length; i++) {
     const startTimeOption = document.createElement("option");
@@ -185,7 +137,9 @@ export async function openDate(serverURL, eventData) {
     newEndTimeEntry.append(endTimeOption);
   }
 
-  newTimeEntryRow.append(
+  const deleteShiftBtn = document.createElement("button");
+
+  newShiftEntryRow.append(
     newStartTimeEntryLabel,
     newStartTimeEntry,
     newEndTimeEntryLabel,
@@ -193,15 +147,9 @@ export async function openDate(serverURL, eventData) {
     newTimeEntrySubmitBtn
   );
 
-  const singersOption = document.createElement("option");
-  singersOption.innerText = `${"VoicePart"}- ${"singerName"}
-  `;
-
-  newSingerEntry.append(singersOption);
-
   //create newSingerEntry in a row
   shiftTableHeaderRow.append(timeHeader, voicePartHeader);
-  shiftTable.append(shiftTableHeaderRow, newTimeEntryRow);
+  shiftTable.append(shiftTableHeaderRow, newShiftEntryRow);
 
   dateContent.append(groupNameSelectionLabel, groupNameSelection, shiftTable);
   dateWindow.append(dateContent);
@@ -229,7 +177,24 @@ export async function openDate(serverURL, eventData) {
 
     */
 
-  for (let i = 0; i < schedule.length; i++) {
-    console.log(schedule[i]);
+  // if (eventData.events[0].dailySchedules) {
+  //   delete eventData.events[0].dailySchedules.empty;
+  // }
+
+  // console.log(eventData.events[0].dailySchedules);
+
+  for (let shift in eventData.events[0].dailySchedules) {
+    // console.log(eventData.events[0].dailySchedules[shift]);
+
+    if (eventData.events[0].dailySchedules[shift] !== "empty") {
+      if (eventData.events[0].dailySchedules[shift].date == currentDate) {
+      buildShiftContent(
+        eventData.events[0].dailySchedules[shift].startTime,
+        eventData.events[0].dailySchedules[shift].endTime,
+        eventData.events[0],
+        groupNameSelection.value
+      );
+    }
+    }
   }
 }

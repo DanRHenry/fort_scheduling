@@ -19,19 +19,24 @@ const EventsSchema = new mongoose.Schema({
     },
     dates: {
         type: Object,
-        required: true
+        required: true,
     },
     singerAvailability: {
         type: Array,
         required: true
     },
     dailySchedules: {
-        type: Array,
-        required: true
+        type: Object,
+        required: true,
+        minimize: false
     },
     songList: {
         type: Array,
         requried: true
+    },
+    archived:{
+        type: Boolean,
+        required: false
     }
 });
 

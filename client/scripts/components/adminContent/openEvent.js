@@ -1,23 +1,24 @@
 import { closeEvent } from "./closeEvent.js";
 import { openDate } from "./openDate.js";
 
-export async function openEvent(eventData, eventRow, handleOpenEvent, handleCloseEvent, serverURL) {
-    eventRow.removeEventListener("click", handleOpenEvent)
-    eventRow.addEventListener("click", handleCloseEvent)
-
-
-  // console.log("event data: ", eventData);
-
-//   const backPanel = document.createElement("div");
-//   backPanel.id = "backPanel";
+export async function openEvent(
+  event,
+  eventRow,
+  handleOpenEvent,
+  handleCloseEvent,
+  serverURL,
+  eventData
+) {
+  eventRow.removeEventListener("click", handleOpenEvent);
+  eventRow.addEventListener("click", handleCloseEvent);
 
   const eventWindow = document.createElement("div");
-  eventWindow.id = `eventWindow_${eventData._id}`;
+  eventWindow.id = `eventWindow_${event._id}`;
 
   const calendar = document.createElement("div");
   calendar.id = "calendar";
 
-  const startDates = eventData.dates.startDate.split("-");
+  const startDates = event.dates.startDate.split("-");
 
   const months = {
     0: "Jan",
@@ -39,9 +40,7 @@ export async function openEvent(eventData, eventRow, handleOpenEvent, handleClos
   let startMonth = +startDates[1];
   startMonth--;
 
-//   console.log(months[startMonth]);
-
-  const endDates = eventData.dates.endDate.split("-");
+  const endDates = event.dates.endDate.split("-");
   const endYear = endDates[0];
   const endDate = endDates[2];
   let endMonth = +endDates[1];
@@ -57,26 +56,36 @@ export async function openEvent(eventData, eventRow, handleOpenEvent, handleClos
 
   let index = 0;
 
+  let blockDates = [];
   while (current <= end) {
+    blockDates.push(current);
     const block = document.createElement("div");
     block.className = "blocks";
-    block.addEventListener("click", handleOpenDate)
-
-    function handleOpenDate() {
-        openDate(serverURL, eventData)
-    }
 
     if (index - startingDay > -6) {
       calendar.append(block);
     }
-
+    const month = padDateElement(current.getMonth());
+    const date = padDateElement(current.getDate());
+    const year = padDateElement(current.getFullYear());
     if (index - startingDay > 0) {
       if (current.getDate() === 1) {
         block.innerText = `${
           months[current.getMonth()]
         }\n ${current.getDate()}`;
+
+        block.id = `${month}${date}${year}`;
+
+        block.addEventListener("click", function () {
+          openDate(serverURL, eventData, this.id);
+        });
       } else {
         block.innerText = `${current.getDate()}`;
+        block.id = `${month}${date}${year}`;
+        block.addEventListener("click", function () {
+          console.log("block ID: ", this.id);
+          openDate(serverURL, eventData, this.id);
+        });
       }
     }
 
@@ -88,27 +97,20 @@ export async function openEvent(eventData, eventRow, handleOpenEvent, handleClos
 
       if (current.getMonth() < next.getMonth()) {
         index = 0;
-        // console.log(current.getMonth(), " and ", next.getMonth());
-        index = 0;
         startingDay = 0;
       }
     }
   }
 
-  // for (let i = 0-startingDay; i-startingDay <= 30; i++) {
-  //     const block = document.createElement("div")
-  //     block.className = "blocks"
-  //     if (i-startingDay > -6 ){
-  //         calendar.append(block)
-  //         if (i-startingDay > 0) {
-  //             block.innerText = i-startingDay
-  //         }
-  //     }
-
-  // }
-
   eventWindow.append(calendar);
 
-//   console.log("startDates: ", startDates);
   document.getElementsByTagName("body")[0].append(eventWindow);
+
+  function padDateElement(element) {
+    if (element.toString().length < 2) {
+      return element.toString().padStart(2, "0").toString();
+    } else {
+      return element.toString();
+    }
+  }
 }

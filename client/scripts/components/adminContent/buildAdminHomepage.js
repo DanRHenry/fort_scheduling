@@ -1,4 +1,4 @@
-import { handleSubmitNewEvent } from "./fetches/handleSubmitNewEvent.js";
+import { createNewEvent } from "./fetches/createNewEvent.js";
 import { getAllEvents } from "./fetches/getAllEvents.js";
 import { buildEvent } from "./buildEvent.js";
 
@@ -45,7 +45,7 @@ export async function buildAdminHomepage(serverURL, data) {
       alert("Enter Event Name");
       return;
     }
-    handleSubmitNewEvent(serverURL, {
+    createNewEvent(serverURL, {
       name: eventNameField.value,
       adminEmail: data.user.email,
       adminID: data.user._id,
@@ -54,8 +54,9 @@ export async function buildAdminHomepage(serverURL, data) {
         endDate: calendarEndDateField.value,
       },
       singerAvailability: [],
-      dailySchedules: [],
+      dailySchedules: {},
       songList: [],
+      archived: false
     });
   });
 
@@ -93,6 +94,7 @@ export async function buildAdminHomepage(serverURL, data) {
 
   const eventData = await getAllEvents(serverURL, sessionStorage.token);
 
+  console.log("first eventData: ",eventData)
 //   console.log(eventData.events);
 
   const eventTable = document.createElement("table");
