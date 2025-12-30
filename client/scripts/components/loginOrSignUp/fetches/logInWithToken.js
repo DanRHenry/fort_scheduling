@@ -1,5 +1,5 @@
-import { buildAdminHomepage } from "../adminContent/buildAdminHomepage.js";
-import { buildUserHomepage } from "../userContent/buildUserHomepage.js";
+import { buildAdminHomepage } from "../../adminContent/buildAdminHomepage.js";
+import { buildUserHomepage } from "../../userContent/buildUserHomepage.js";
 
 export async function logInWithToken(serverURL) {
   try {

@@ -41,24 +41,15 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
-  // imgName: {
-  //   type: String,
-  //   required: false
-  // },
-  imgDesc: {
-    type: String,
-    required: false
-  },
-  // imgData: {
-  //   data: Buffer, 
-  //   contentType: String,
-  //   required: false
-  // },
   imgURL: {
     type: String,
     required: false
   },
   comments: {
+    type: Array,
+    required: false
+  },
+  adminNotes: {
     type: Array,
     required: false
   }

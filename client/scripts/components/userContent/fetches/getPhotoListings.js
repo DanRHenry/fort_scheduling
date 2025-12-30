@@ -1,6 +1,7 @@
-export async function getPicture(serverURL) {
+export async function getPhotoListings(serverURL) {
+  
   try {
-    const URL = `${serverURL}/storage/photos`
+    const URL = `${serverURL}/storage/photolistings`
 
     const res = await fetch(URL, {
         method: "GET",
@@ -12,6 +13,7 @@ export async function getPicture(serverURL) {
     })
 
     const data = await res.json()
+    // console.log(data)
     return data
   } catch (err) {
     console.error(err);

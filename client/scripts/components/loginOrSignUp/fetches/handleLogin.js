@@ -1,6 +1,6 @@
-import { buildUserHomepage } from "../userContent/buildUserHomepage.js";
-import { buildSignUpSection } from "./buildSignUpSection.js";
-import { buildAdminHomepage } from "../adminContent/buildAdminHomepage.js"
+import { buildUserHomepage } from "../../userContent/buildUserHomepage.js";
+import { buildSignUpSection } from "../buildSignUpSection.js";
+import { buildAdminHomepage } from "../../adminContent/buildAdminHomepage.js"
 
 export async function handleLogin(serverURL, email, password) {
   try {

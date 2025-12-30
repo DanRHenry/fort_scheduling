@@ -1,6 +1,6 @@
 import { buildSignUpSection } from "./components/loginOrSignUp/buildSignUpSection.js";
-import { handleLogin } from "./components/loginOrSignUp/handleLogin.js";
-import { logInWithToken } from "./components/loginOrSignUp/logInWithToken.js";
+import { handleLogin } from "./components/loginOrSignUp/fetches/handleLogin.js";
+import { logInWithToken } from "./components/loginOrSignUp/fetches/logInWithToken.js";
 
 const serverURL = "http://127.0.0.1:4041";
 const loginForm = document.getElementById("loginForm");
