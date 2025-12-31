@@ -13,6 +13,25 @@ const serverError = (res, error) => {
   });
 };
 
+router.get("/", requireValidation, async (req, res) => {
+  console.log("finding all users...")
+  try {
+    const users = await User.find()
+
+    users 
+    ? 
+        res.status(200).json({
+          message: "success, users found",
+          users
+        })
+    : res.status(404).json({
+      message: "no users found"
+    })
+  } catch(err) {
+    serverError(err)
+  }
+})
+
 router.post("/signup", async (req, res) => {
   try {
     console.log(req.body);

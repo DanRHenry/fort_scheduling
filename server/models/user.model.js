@@ -52,6 +52,11 @@ const UserSchema = new mongoose.Schema({
   adminNotes: {
     type: Array,
     required: false
+  },
+  events: {
+    type: Object,
+    required: false,
+    minimize: false
   }
 });
 

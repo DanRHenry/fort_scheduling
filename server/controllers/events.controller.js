@@ -43,6 +43,24 @@ router.post("/create", async (req, res) => {
   }
 });
 
+router.get("/", async (req, res) => {
+  console.log("getting all events")
+  try{
+    const events = await Events.find()
+
+    events
+      ? res.status(200).json({
+        message: "found events!",
+        events
+      })
+      : res.status(404).json({
+        message: "no events found"
+      })
+  }catch(err) {
+    console.error(err)
+  }
+})
+
 router.get("/getallbyadmin:token", async (req, res) => {
   try{
     // console.log("getting by admin")

@@ -2,9 +2,10 @@ import { openEvent } from "./openEvent.js";
 import { closeEvent } from "./closeEvent.js";
 import { deleteEvent } from "./fetches/deleteEvent.js";
 
-export function buildEvent(event, eventData, serverURL) {
+export function buildEvent(event, eventData, serverURL, allUsers) {
   // console.log("event: ",event)
   // console.log("eventData: ",eventData)
+  
 
   if (!eventData) {
     eventData = undefined;
@@ -48,7 +49,7 @@ export function buildEvent(event, eventData, serverURL) {
   deleteRow.append(deleteButton)
 
   function handleOpenEvent() {
-    openEvent(event, eventRow, handleOpenEvent, handleCloseEvent, serverURL, eventData);
+    openEvent(event, eventRow, handleOpenEvent, handleCloseEvent, serverURL, eventData, allUsers);
   }
 
   function handleCloseEvent() {

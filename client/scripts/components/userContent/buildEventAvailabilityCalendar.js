@@ -1,22 +1,14 @@
-import { closeEvent } from "./closeEvent.js";
-import { openDate } from "./openDate.js";
+import { openAvailabilityWindow } from "./openAvailabilityWindow.js";
 
-export async function openEvent(
-  event,
-  eventRow,
-  handleOpenEvent,
-  handleCloseEvent,
-  serverURL,
-  eventData,
-  allUsers
-) {
+export async function buildEventAvailabilityCalendar(serverURL, event, userData) {
+//   console.log("event: ", event);
+  document.getElementById(`eventWindow_${event._id}`)?.remove();
 
-  document.getElementById(`eventWindow_${event._id}`)?.remove()
-  
   const eventWindow = document.createElement("div");
   eventWindow.id = `eventWindow_${event._id}`;
 
-  document.getElementById("calendar")?.remove()
+  document.getElementById("calendar")?.remove();
+
   const calendar = document.createElement("div");
   calendar.id = "calendar";
 
@@ -57,37 +49,27 @@ export async function openEvent(
   let startingDay = start.getDay();
 
   let index = 0;
-  console.log("startingDay: ", startingDay);
+//   console.log("startingDay: ", startingDay);
   let blockDates = [];
 
-  while(index < startingDay) {
-    blockDates.push('')
-    index++
+  while (index < startingDay) {
+    blockDates.push("");
+    index++;
   }
 
-  const weekdays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
-
-  for (let i = 0; i < weekdays.length; i++) {
-    const calendarHeaderDay = document.createElement("div")
-    calendarHeaderDay.className = "calendarHeaderDays"
-    calendarHeaderDay.innerText = weekdays[i]
-    calendar.append(calendarHeaderDay)
+//   console.log("blockDates: ", blockDates, "index: ", index);
+  for (let i = 1; i < blockDates.length; i++) {
+    const block = document.createElement("div");
+    block.className = "blocks";
+    calendar.append(block);
   }
-
-    for (let i = 1; i < blockDates.length; i++) {
-      const block = document.createElement("div");
-      block.className = "blocks";
-      calendar.append(block)
-    }
   while (current <= end) {
     blockDates.push(current);
     const block = document.createElement("div");
     block.className = "blocks";
 
-
-
     // if (index - startingDay > -4) {
-      calendar.append(block);
+    calendar.append(block);
     // }
     const month = padDateElement(current.getMonth());
     const date = padDateElement(current.getDate());
@@ -100,15 +82,19 @@ export async function openEvent(
 
         block.id = `${month}${date}${year}`;
 
+        const title = `${months[current.getMonth()]} ${date}, ${year}`
+
         block.addEventListener("click", function () {
-          openDate(serverURL, eventData, this.id, allUsers);
+          openAvailabilityWindow(serverURL, event, title, userData);
         });
       } else {
+        const title = `${months[current.getMonth()]} ${date}, ${year}`
+
         block.innerText = `${current.getDate()}`;
         block.id = `${month}${date}${year}`;
         block.addEventListener("click", function () {
           console.log("block ID: ", this.id);
-          openDate(serverURL, eventData, this.id, allUsers);
+          openAvailabilityWindow(serverURL, event, title, userData);
         });
       }
     }
@@ -125,7 +111,6 @@ export async function openEvent(
       }
     }
   }
-
   // console.log(event)
   const eventHeader = document.createElement("div")
   eventHeader.innerText = event.name

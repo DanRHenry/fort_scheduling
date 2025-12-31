@@ -1,7 +1,7 @@
 export async function getPhoto(serverURL, photoName, userID) {
-    console.log(serverURL)
-    console.log(photoName)
-    console.log(userID)
+    // console.log(serverURL)
+    // console.log(photoName)
+    // console.log(userID)
     const mimeType = "image/png"
 
     const fetchURL = `${serverURL}/storage/imageName/${photoName}/${userID}`

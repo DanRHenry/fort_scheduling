@@ -1,8 +1,9 @@
 import { openSingerInformation } from "./openDateFunctions/openSingerInformation.js";
 
-export function buildShiftContent(startTime, endTime, eventData, role) {
+export function buildShiftContent(startTime, endTime, eventData, role, allUsers) {
 
   console.log("role: ", role)
+  console.log("allUsers: ",allUsers)
 
   const oldSingersRows = document.getElementsByClassName("inputSingersRows")
 

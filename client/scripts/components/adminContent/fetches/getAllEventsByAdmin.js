@@ -1,4 +1,4 @@
-export async function getAllEvents(serverURL) {
+export async function getAllEventsByAdmin(serverURL) {
   try {
     const URL = `${serverURL}/events/getallbyadmin${sessionStorage.token}`;
 

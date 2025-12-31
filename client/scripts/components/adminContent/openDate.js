@@ -3,9 +3,10 @@ import { createShift } from "./fetches/createShift.js";
 import { getShiftData } from "./fetches/getShiftData.js";
 import { buildShiftContent } from "./buildShiftContent.js";
 
-export async function openDate(serverURL, eventData, currentDate) {
+export async function openDate(serverURL, eventData, currentDate, allUsers) {
   // console.log("opening date");
-  console.log("currentDate: ", currentDate)
+  console.log("currentDate: ", currentDate);
+  // console.log("allUsers", allUsers);
 
   // const shiftData = await getShiftData(serverURL)
 
@@ -37,21 +38,27 @@ export async function openDate(serverURL, eventData, currentDate) {
       colorsList[groupNameSelection.value].backgroundColor;
     dateWindow.style.color = colorsList[groupNameSelection.value].fontColor;
 
-      for (let shift in eventData.events[0].dailySchedules) {
-    // console.log(eventData.events[0].dailySchedules[shift]);
+    for (let shift in eventData.events[0].dailySchedules) {
+      // console.log(eventData.events[0].dailySchedules[shift]);
 
-    if (eventData.events[0].dailySchedules[shift] !== "empty") {
-      if (eventData.events[0].dailySchedules[shift].date == currentDate) {
-      buildShiftContent(
-        eventData.events[0].dailySchedules[shift].startTime,
-        eventData.events[0].dailySchedules[shift].endTime,
-        eventData.events[0],
-        groupNameSelection.value
-      );
+
+      if (eventData.events[0].dailySchedules[shift] !== "empty") {
+        if (eventData.events[0].dailySchedules[shift].date == currentDate) {
+
+                  console.log("allUsers",allUsers)
+
+          buildShiftContent(
+            eventData.events[0].dailySchedules[shift].startTime,
+            eventData.events[0].dailySchedules[shift].endTime,
+            eventData.events[0],
+            groupNameSelection.value,
+            allUsers
+          );
+        }
+      }
     }
-    }
-  }
   });
+        // console.log("allUsers",allUsers)
 
   const goldOption = document.createElement("option");
   goldOption.innerText = "gold";
@@ -188,13 +195,14 @@ export async function openDate(serverURL, eventData, currentDate) {
 
     if (eventData.events[0].dailySchedules[shift] !== "empty") {
       if (eventData.events[0].dailySchedules[shift].date == currentDate) {
-      buildShiftContent(
-        eventData.events[0].dailySchedules[shift].startTime,
-        eventData.events[0].dailySchedules[shift].endTime,
-        eventData.events[0],
-        groupNameSelection.value
-      );
-    }
+        buildShiftContent(
+          eventData.events[0].dailySchedules[shift].startTime,
+          eventData.events[0].dailySchedules[shift].endTime,
+          eventData.events[0],
+          groupNameSelection.value,
+          allUsers
+        );
+      }
     }
   }
 }

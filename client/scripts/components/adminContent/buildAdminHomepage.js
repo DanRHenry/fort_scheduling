@@ -1,8 +1,11 @@
 import { createNewEvent } from "./fetches/createNewEvent.js";
-import { getAllEvents } from "./fetches/getAllEvents.js";
+import { getAllEventsByAdmin } from "./fetches/getAllEventsByAdmin.js";
 import { buildEvent } from "./buildEvent.js";
+import { getAllUserData } from "./fetches/getAllUserData.js";
 
 export async function buildAdminHomepage(serverURL, data) {
+  const allUsers = await getAllUserData(serverURL)
+
 //   console.log("admin page");
 //   console.table(data);
 
@@ -92,7 +95,7 @@ export async function buildAdminHomepage(serverURL, data) {
 
   body.append(logoutBtn, newEventInputForm);
 
-  const eventData = await getAllEvents(serverURL, sessionStorage.token);
+  const eventData = await getAllEventsByAdmin(serverURL, sessionStorage.token);
 
   console.log("first eventData: ",eventData)
 //   console.log(eventData.events);
@@ -123,11 +126,13 @@ export async function buildAdminHomepage(serverURL, data) {
 
   body.append(eventTable, deleteTable);
 
+  // console.log("allUsers",allUsers)
   for (let i = 0; i < eventData.events.length; i++) {
     const event = eventData.events[i];
-    buildEvent(event, eventData, serverURL);
+    buildEvent(event, eventData, serverURL, allUsers);
   }
 }
+
 
 /* 
 Start Date
