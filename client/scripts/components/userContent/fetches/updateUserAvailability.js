@@ -8,7 +8,7 @@ export async function updateUserAvailability(
   eventTitle
 ) {
 
-    console.log("userData: ",userData)
+    // console.log("userData: ",userData)
   let eventsObject = userData.user.events;
 
   if (!eventsObject[eventID].availability) {
@@ -29,7 +29,7 @@ export async function updateUserAvailability(
     eventsObject[eventID].availability[eventTitle][check.id] = check.checked;
   }
 
-  console.log("eventsObject: ", eventsObject);
+//   console.log("eventsObject: ", eventsObject);
 
   updateUserProfile(serverURL, userData.user._id, {
     events: eventsObject

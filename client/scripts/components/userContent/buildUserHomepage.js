@@ -5,6 +5,8 @@ import { getPhoto } from "./fetches/getPhoto.js";
 import { getAllEvents } from "./fetches/getAllEvents.js";
 import { joinEvent } from "./fetches/joinEvent.js";
 import { buildEventAvailabilityCalendar } from "./buildEventAvailabilityCalendar.js";
+// import {getUserInformation} from "./fetches/getUserInformation.js"
+
 
 export async function buildUserHomepage(userData, serverURL) {
   //   console.log(userData);
@@ -16,6 +18,8 @@ export async function buildUserHomepage(userData, serverURL) {
   logoutBtn.innerText = "Log Out";
   logoutBtn.addEventListener("click", () => {
     sessionStorage.removeItem("token");
+
+    const userData = "await" 
     window.location.reload();
   });
   body.append(logoutBtn);
@@ -365,7 +369,8 @@ export async function buildUserHomepage(userData, serverURL) {
     if (selectedEvent[0].innerText !== "select") {
       // console.log(allEvents[0]._id)
       // console.log(userData.user?.events[eventID]);
-      if (!userData.user?.events[eventID]) {
+
+      if (!userData.user?.events || !userData.user?.events[eventID]) {
         const joinEventButton = document.createElement("button");
         joinEventButton.id = "joinEventButton";
         joinEventButton.innerText = `Join ${selectedEvent[0].innerText} Group`;
@@ -386,12 +391,14 @@ export async function buildUserHomepage(userData, serverURL) {
             }
           } else {
             console.log('no existing events')
-            eventObject = {events: 
+            eventObject = 
+            // {events: 
               {[eventID]: {
                 name: selectedEvent[0].innerText,
                 id: eventID,
                 availability: {}
-              }},
+              }
+            // },
             };
           }
           console.log("eventObject: ",eventObject)

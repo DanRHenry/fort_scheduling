@@ -61,6 +61,21 @@ export async function openAvailabilityWindow(
     availabilityCheckbox.checked = true;
     //todo change checked to the existing information found in the user object
     availabilityCheckbox.addEventListener("change", () => {
+      if (availabilityCheckbox.checked === false) {
+        document.getElementById(`preferredTimeCheckbox_${i}`).checked = false;
+        document.getElementById(`preferredTimeCheckbox_${i}`).style.visibility =
+          "hidden";
+        updateUserAvailability(
+          serverURL,
+          document.getElementById(`preferredTimeCheckbox_${i}`),
+          userData,
+          event._id,
+          title
+        );
+      } else {
+        document.getElementById(`preferredTimeCheckbox_${i}`).style.visibility =
+          "visible";
+      }
       updateUserAvailability(
         serverURL,
         availabilityCheckbox,
@@ -71,7 +86,7 @@ export async function openAvailabilityWindow(
     });
 
     const preferredTimeCheckbox = document.createElement("input");
-    preferredTimeCheckbox.id = `"preferredTimeCheckbox_${i}`;
+    preferredTimeCheckbox.id = `preferredTimeCheckbox_${i}`;
     preferredTimeCheckbox.className = "preferredTimeCheckboxes";
     preferredTimeCheckbox.type = "checkbox";
     preferredTimeCheckbox.checked = false;
