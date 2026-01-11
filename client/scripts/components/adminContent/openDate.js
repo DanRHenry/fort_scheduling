@@ -2,18 +2,22 @@ import { openSingerInformation } from "./openDateFunctions/openSingerInformation
 import { createShift } from "./fetches/createShift.js";
 import { getShiftData } from "./fetches/getShiftData.js";
 import { buildShiftContent } from "./buildShiftContent.js";
+import { deleteShift } from "./fetches/deleteShift.js";
 
-export async function openDate(serverURL, eventData, currentDate, allUsers) {
-  // console.log("opening date");
-  console.log("currentDate: ", currentDate);
-  // console.log("allUsers", allUsers);
-
-  // const shiftData = await getShiftData(serverURL)
-
-  console.log("eventData: ", eventData);
-  // console.log("shiftData: ",shiftData)
-  // console.log("currentDate: ",currentDate)
-  // const schedule = eventData.dailySchedules;
+export async function openDate(
+  serverURL,
+  eventData,
+  currentDate,
+  current,
+  months,
+  weekdays,
+  eventUsers
+) {
+  console.log("Opening date...");
+  const month = currentDate.slice(0, 2);
+  const date = currentDate.slice(2, 4);
+  const year = currentDate.slice(4, 8);
+  const day = new Date(year, month, date).getDay();
 
   const dateWindow = document.createElement("div");
   dateWindow.id = "dateWindow";
@@ -28,54 +32,18 @@ export async function openDate(serverURL, eventData, currentDate, allUsers) {
     gold: { backgroundColor: "rgb(204, 174, 3)", fontColor: "black" },
   };
 
-  const groupNameSelection = document.createElement("select");
-  groupNameSelection.id = "groupNameSelection";
-  groupNameSelection.name = "groupNameSelection";
-  dateWindow.style.backgroundColor = "red";
-  dateWindow.style.color = "white";
-  groupNameSelection.addEventListener("change", () => {
-    dateWindow.style.backgroundColor =
-      colorsList[groupNameSelection.value].backgroundColor;
-    dateWindow.style.color = colorsList[groupNameSelection.value].fontColor;
+  let shifts;
 
-    for (let shift in eventData.events[0].dailySchedules) {
-      // console.log(eventData.events[0].dailySchedules[shift]);
+  if (!eventData.events[0].dailySchedules) {
+    eventData.events[0].dailySchedules = {};
+  }
 
-
-      if (eventData.events[0].dailySchedules[shift] !== "empty") {
-        if (eventData.events[0].dailySchedules[shift].date == currentDate) {
-
-                  console.log("allUsers",allUsers)
-
-          buildShiftContent(
-            eventData.events[0].dailySchedules[shift].startTime,
-            eventData.events[0].dailySchedules[shift].endTime,
-            eventData.events[0],
-            groupNameSelection.value,
-            allUsers
-          );
-        }
-      }
-    }
-  });
-        // console.log("allUsers",allUsers)
-
-  const goldOption = document.createElement("option");
-  goldOption.innerText = "gold";
-
-  const redOption = document.createElement("option");
-  redOption.innerText = "red";
-
-  const greenOption = document.createElement("option");
-  greenOption.innerText = "green";
-
-  groupNameSelection.append(redOption, greenOption, goldOption);
+  shifts = Object.values(eventData.events[0].dailySchedules).filter(
+    (schedule) => schedule.date === currentDate
+  );
 
   const dateContent = document.createElement("div");
   dateContent.id = "dateContent";
-
-  const shiftTable = document.createElement("table");
-  shiftTable.id = "shiftTable";
 
   const shiftTableHeaderRow = document.createElement("tr");
 
@@ -109,8 +77,12 @@ export async function openDate(serverURL, eventData, currentDate, allUsers) {
     handleNewTimeEntrySubmitBtnClick
   );
 
-  // console.log("eventData: ",eventData)
   function handleNewTimeEntrySubmitBtnClick() {
+    console.log(document.getElementById("newStartTimeEntry").value);
+    console.log(document.getElementById("newEndTimeEntry").value);
+    console.log(currentDate);
+    console.log(eventData);
+    console.log(serverURL);
     createShift(
       document.getElementById("newStartTimeEntry").value,
       document.getElementById("newEndTimeEntry").value,
@@ -144,8 +116,6 @@ export async function openDate(serverURL, eventData, currentDate, allUsers) {
     newEndTimeEntry.append(endTimeOption);
   }
 
-  const deleteShiftBtn = document.createElement("button");
-
   newShiftEntryRow.append(
     newStartTimeEntryLabel,
     newStartTimeEntry,
@@ -154,15 +124,40 @@ export async function openDate(serverURL, eventData, currentDate, allUsers) {
     newTimeEntrySubmitBtn
   );
 
-  //create newSingerEntry in a row
-  shiftTableHeaderRow.append(timeHeader, voicePartHeader);
-  shiftTable.append(shiftTableHeaderRow, newShiftEntryRow);
+  shiftTableHeaderRow.append(timeHeader);
+  dateContent.append(newShiftEntryRow);
 
-  dateContent.append(groupNameSelectionLabel, groupNameSelection, shiftTable);
-  dateWindow.append(dateContent);
+  const dateContentHeader = document.createElement("div");
+  dateContentHeader.id = "dateContentHeader";
+  dateContentHeader.innerText = `${weekdays[day]} ${months[month]} ${date}, ${year}`;
+
+  document.getElementById("dateWindow")?.remove();
+  const shiftHeaderRow = document.createElement("div");
+  shiftHeaderRow.id = "shiftHeaderRow";
+
+  dateWindow.append(dateContentHeader, dateContent);
 
   document.querySelector("body").append(dateWindow);
 
+  // console.log("eventData: ", eventData.events[0]);
+
+  // if (shifts?.length > 0) {
+  // console.log("shifts: ", shifts);
+  for (let shift of shifts) {
+    const deleteShiftBtn = document.createElement("button");
+    deleteShiftBtn.innerText = "X";
+    deleteShiftBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      deleteShift(serverURL, shift, eventData);
+    });
+    const shiftRow = document.createElement("div");
+    shiftRow.innerText = "shift singerRow here";
+    shiftRow.append(deleteShiftBtn);
+    dateContent.append(shiftRow);
+    console.log(shifts);
+    console.log(shift);
+  }
+  // }
   /* 
     When Date Cells are selected, a list of times pops up, with the last option for creating a new time
 
@@ -188,21 +183,24 @@ export async function openDate(serverURL, eventData, currentDate, allUsers) {
   //   delete eventData.events[0].dailySchedules.empty;
   // }
 
-  // console.log(eventData.events[0].dailySchedules);
+  // if (eventData.events[0].dailySchedules) {
+  //   // console.log(eventData.events[0].dailySchedules)
 
-  for (let shift in eventData.events[0].dailySchedules) {
-    // console.log(eventData.events[0].dailySchedules[shift]);
+  // for (let shift in eventData.events[0].dailySchedules) {
+  //   // console.log("shift: ",shift)
+  //   // console.log(eventData.events[0].dailySchedules[shift]);
 
-    if (eventData.events[0].dailySchedules[shift] !== "empty") {
-      if (eventData.events[0].dailySchedules[shift].date == currentDate) {
-        buildShiftContent(
-          eventData.events[0].dailySchedules[shift].startTime,
-          eventData.events[0].dailySchedules[shift].endTime,
-          eventData.events[0],
-          groupNameSelection.value,
-          allUsers
-        );
-      }
-    }
-  }
+  //   // if (eventData.events[0].dailySchedules[shift] !== "empty") {
+  //     if (eventData.events[0].dailySchedules[shift].date == currentDate) {
+  //       buildShiftContent(
+  //         eventData.events[0].dailySchedules[shift].startTime,
+  //         eventData.events[0].dailySchedules[shift].endTime,
+  //         eventData.events[0],
+  //         // groupNameSelection.value,
+  //         // eventUsers,
+  //       );
+  //       // }
+  //     }
+  //   }
+  // }
 }

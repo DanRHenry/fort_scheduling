@@ -45,7 +45,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: false
   },
-  comments: {
+  bio: {
     type: Array,
     required: false
   },
@@ -57,6 +57,10 @@ const UserSchema = new mongoose.Schema({
     type: Object,
     required: false,
     minimize: false
+  },
+  currentEvent: {
+    type: String,
+    required: false
   }
 });
 

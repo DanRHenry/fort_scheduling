@@ -2,19 +2,13 @@ import { openEvent } from "./openEvent.js";
 import { closeEvent } from "./closeEvent.js";
 import { deleteEvent } from "./fetches/deleteEvent.js";
 
-export function buildEvent(event, eventData, serverURL, allUsers) {
-  // console.log("event: ",event)
-  // console.log("eventData: ",eventData)
-  
-
+export function buildEvent(event, eventData, serverURL, allUsers, eventListenerStatusObject) {
   if (!eventData) {
     eventData = undefined;
   }
-
-//   console.log(event, eventData);
   const eventRow = document.createElement("tr");
   eventRow.className = "events";
-  eventRow.id = event._id
+  eventRow.id = event._id;
 
   const eventName = document.createElement("td");
   eventName.innerText = event.name;
@@ -29,27 +23,35 @@ export function buildEvent(event, eventData, serverURL, allUsers) {
 
   eventRow.addEventListener("click", handleOpenEvent);
 
-  const deleteRow = document.createElement("tr")
-  deleteRow.className = "deleteRows"
-  deleteRow.id = `delete_${event._id}`
-  const deleteButton = document.createElement("button")
-  deleteButton.innerText = "X"
-  deleteButton.addEventListener("click", handleDeleteEvent)
-
+  const deleteRow = document.createElement("tr");
+  deleteRow.className = "deleteRows";
+  deleteRow.id = `delete_${event._id}`;
+  const deleteButton = document.createElement("button");
+  deleteButton.innerText = "X";
+  deleteButton.addEventListener("click", handleDeleteEvent);
 
   function handleDeleteEvent() {
     if (confirm("Are you sure you want to delete this event?")) {
-        if (confirm("This is PERMANENT, are you sure?")) {
-            // console.log("boom!")
-            console.log("deleting this: ",event)
-            deleteEvent(serverURL,event)
-        }
+      if (confirm("This is PERMANENT, are you sure?")) {
+        console.log("deleting this: ", event);
+        deleteEvent(serverURL, event);
+      }
     }
   }
-  deleteRow.append(deleteButton)
+  deleteRow.append(deleteButton);
 
   function handleOpenEvent() {
-    openEvent(event, eventRow, handleOpenEvent, handleCloseEvent, serverURL, eventData, allUsers);
+
+    openEvent(
+      event,
+      eventRow,
+      handleOpenEvent,
+      handleCloseEvent,
+      serverURL,
+      eventData,
+      allUsers,
+      eventListenerStatusObject
+    );
   }
 
   function handleCloseEvent() {
@@ -57,5 +59,5 @@ export function buildEvent(event, eventData, serverURL, allUsers) {
   }
 
   document.getElementById("eventTable").append(eventRow);
-  document.getElementById("deleteTable").append(deleteRow)
+  document.getElementById("deleteTable").append(deleteRow);
 }

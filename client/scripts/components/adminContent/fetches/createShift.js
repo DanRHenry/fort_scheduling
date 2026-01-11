@@ -9,36 +9,44 @@ export async function createShift(
   serverURL
 ) {
   try {
-    const group = document.getElementById("groupNameSelection").value;
-    const eventObject = {
+    console.log("eventData: ", eventData.events);
+    // const group = document.getElementById("groupNameSelection").value;
+    const shiftObject = {
       date: date,
       startTime: startTime,
-      group: group,
+      groups: [
+        // {
+        //   groupLeader: "",
+        //   groupColor: "",
+        //   sopranos: [],
+        //   altos: [],
+        //   tenors: [],
+        //   basses: [],
+        // },
+      ],
       endTime: endTime,
       //add selected singers to this list after the event has been created
       //add groupLeader (selected) after the event has been created
-      groupLeader: "leaderName",
-      sopranos: ["sop 1", "sop2"],
-      altos: ["alt 1", "alt 2"],
-      tenors: ["ten 1", "ten 2"],
-      basses: ["bas 1", "bas 2"],
-      comments: ["comment 1", "comment 2"],
+
+      comments: [],
     };
 
     const existingShiftData = await getShiftData(serverURL);
-    console.log(existingShiftData);
+    console.log(existingShiftData.events);
 
-    let eventInformation = eventData.events[0].dailySchedules;
-        delete eventInformation.empty;
+    let dailySchedules = {}
+    if (existingShiftData.events[0].dailySchedules) {
+       dailySchedules = existingShiftData.events[0].dailySchedules;
+    }
+    // delete dailySchedules.empty;
 
+    // console.log(dailySchedules);
 
-    console.log(eventInformation);
+    dailySchedules[`${date}_${startTime}_${endTime}`] = shiftObject;
 
-    eventInformation[`${date}_${startTime}_${endTime}_${group}`] = eventObject;
-
-
-    console.log("eventID: ", eventData.events[0]._id);
-    const URL = `${serverURL}/events/update${eventData.events[0]._id}`;
+    // console.log("dailySchedules: ", dailySchedules);
+    // console.log("eventID: ", existingShiftData.events[0]._id);
+    const URL = `${serverURL}/events/update${existingShiftData.events[0]._id}`;
 
     const updateData = await fetch(URL, {
       method: "PATCH",
@@ -47,7 +55,7 @@ export async function createShift(
         "Content-Type": "application/json",
         authorization: sessionStorage.token,
       },
-      body: JSON.stringify(eventInformation),
+      body: JSON.stringify(dailySchedules),
     });
 
     const data = await updateData.json();
@@ -58,7 +66,7 @@ export async function createShift(
     }
 
     //! after creating a new shift and patching the existing events, fetch the event data
-    buildShiftContent(startTime, endTime, eventData);
+    buildShiftContent(startTime, endTime, existingShiftData);
   } catch (err) {
     console.error(err);
   }

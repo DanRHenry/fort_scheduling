@@ -107,53 +107,6 @@ router.get("/getallshiftdata:token", async (req, res) => {
   }
 })
 
-// router.patch("/getbyshiftid:id", async (req, res) => {
-//   try {
-//     // console.log("updating")
-//     const {id} = req.params
-
-//     // console.log(req.body)
-//     // const { updateInfo } = req.body;
-
-//     // console.log("updateID: ",id)
-//     // console.log("updateInfo: ",updateInfo)
-
-//     const info = await Events.findOne({_id: id})
-//     // console.log("info: ",info)
-//     // const record = await Events.findOne({ _id: id});
-     
-//     const record = null
-//     if (!record) {
-//       res.status(404).json({
-//         message: "Entry not found.",
-//       });
-//     } 
-    
-//     // This makes sure the information has been updated before returning
-//     const returnOption = { new: true };
-
-//     const updateEventRecord = await Events.findOneAndUpdate(
-//       {_id: record._id},
-
-//       // updateInfo,
-//       returnOption
-//     );
-
-//     updateEventRecord
-//       ? res.status(200).json({
-//           message: "Event entry has been updated successfully.",
-//           updateEventRecord,
-//         })
-//       : res.status(520).json({
-//           message: "Unable to update the events entry. Try again later.",
-//         });
-//   } catch (err) {
-//     console.log("error: ",err)
-//     serverError(err);
-//   }
-// });
-
-
 //!Update an Events Entry
 
 router.patch("/update:id", async (req, res) => {
@@ -234,6 +187,34 @@ router.delete("/delete:eventID", async (req, res) => {
   }
 
 });
+
+
+//!Delete a shift entry
+
+router.delete("/removeshift/:eventID/:shiftID", async (req, res) => {
+  try {
+console.log("------------------------")
+  const {eventID,shiftID} = req.params
+  const record = {_id: eventID}
+
+const updatedEvent = await Events.updateOne(record, {$unset: {[`dailySchedules.${[shiftID]}`]: ""}}
+)
+
+if (updatedEvent){console.log("updatedEvent: ", updatedEvent)}
+updatedEvent
+  ? res.status(200).json({
+    message: "success",
+    updatedEvent
+  })
+  : res.status(404).json({
+    message: "not found"
+  })
+  
+} catch(err) {
+    console.error(err)
+  }
+})
+
 // !========================================================
 
 // // used

@@ -5,31 +5,28 @@ export async function updateUserAvailability(
   check,
   userData,
   eventID,
-  eventTitle
+  title,
 ) {
 
-    // console.log("userData: ",userData)
   let eventsObject = userData.user.events;
 
   if (!eventsObject[eventID].availability) {
     eventsObject[eventID].availability = {
-      [eventTitle]: { [check.id]: check.checked },
+      [title]: { [check.id]: check.checked },
     };
   }
 
-  if (!eventsObject[eventID].availability[eventTitle]) {
-    eventsObject[eventID].availability[eventTitle] = {
+  if (!eventsObject[eventID].availability[title]) {
+    eventsObject[eventID].availability[title] = {
       [check.id]: check.checked,
     };
   }
 
-  if (!eventsObject[eventID].availability[eventTitle][check.id]) {
-    eventsObject[eventID].availability[eventTitle][check.id] = check.checked;
+  if (!eventsObject[eventID].availability[title][check.id]) {
+    eventsObject[eventID].availability[title][check.id] = check.checked;
   } else {
-    eventsObject[eventID].availability[eventTitle][check.id] = check.checked;
+    eventsObject[eventID].availability[title][check.id] = check.checked;
   }
-
-//   console.log("eventsObject: ", eventsObject);
 
   updateUserProfile(serverURL, userData.user._id, {
     events: eventsObject

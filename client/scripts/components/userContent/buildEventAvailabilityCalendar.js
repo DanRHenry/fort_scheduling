@@ -6,6 +6,7 @@ export async function buildEventAvailabilityCalendar(serverURL, event, userData)
 
   const eventWindow = document.createElement("div");
   eventWindow.id = `eventWindow_${event._id}`;
+  eventWindow.className = "eventWindows"
 
   document.getElementById("calendar")?.remove();
 
@@ -85,6 +86,9 @@ export async function buildEventAvailabilityCalendar(serverURL, event, userData)
         const title = `${months[current.getMonth()]} ${date}, ${year}`
 
         block.addEventListener("click", function () {
+          console.log("block ID: ", this.id);
+          console.log(title)
+          console.log(userData)
           openAvailabilityWindow(serverURL, event, title, userData);
         });
       } else {
@@ -93,9 +97,18 @@ export async function buildEventAvailabilityCalendar(serverURL, event, userData)
         block.innerText = `${current.getDate()}`;
         block.id = `${month}${date}${year}`;
         block.addEventListener("click", function () {
-          console.log("block ID: ", this.id);
-          openAvailabilityWindow(serverURL, event, title, userData);
+          // console.log("block ID: ", this.id);
+          // console.log(title)
+          // console.log(event)
+          // console.log(userData.user.events)
+          openAvailabilityWindow(serverURL, event, title, userData, block);
         });
+
+
+        if(userData.user.events[event._id].availability && userData.user.events[event._id].availability[title]){
+            block.style.backgroundColor = "red"
+            block.style.color = "white"
+          }
       }
     }
 

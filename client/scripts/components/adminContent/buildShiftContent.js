@@ -1,24 +1,17 @@
 import { openSingerInformation } from "./openDateFunctions/openSingerInformation.js";
 
-export function buildShiftContent(startTime, endTime, eventData, role, allUsers) {
-
-  console.log("role: ", role)
-  console.log("allUsers: ",allUsers)
-
-  const oldSingersRows = document.getElementsByClassName("inputSingersRows")
-
-  for (let i = oldSingersRows.length; i > 0; i -- ) {
-    oldSingersRows[i]?.remove()
-  }
-
-  // console.log("startTime: ",startTime)
-  // console.log("endTime: ",endTime)
-
-  console.log("event data: ",eventData)
-  console.log("role: ",role)
+export function buildShiftContent(
+  startTime,
+  endTime,
+  eventData,
+  // role,
+  // eventUsers,
+  allUsers
+) {
+  console.log("allUsers: ", allUsers);
 
   const inputSingersRow = document.createElement("tr");
-  inputSingersRow.className = "inputSingersRows"
+  inputSingersRow.className = "inputSingersRows";
   const time = document.createElement("td");
   time.innerText = `${startTime}-${endTime}`;
 
@@ -75,29 +68,8 @@ export function buildShiftContent(startTime, endTime, eventData, role, allUsers)
     while (addSingerField.firstChild) {
       addSingerField.removeChild(addSingerField.firstChild);
     }
-  eventData.singerAvailability = [
-    {
-      name: "1st singer Name",
-      primary: "soprano",
-      secondary: "alto",
-      phone: "cellNumberHere",
-      _id: "12345",
-    },
-    {
-      name: "2nd singer Name",
-      primary: "tenor",
-      secondary: "bass",
-      phone: "cellNumberHere",
-      _id: "54321",
-    },
-    {
-      name: "3rd singer Name",
-      primary: "soprano",
-      secondary: "alto",
-      phone: "cellNumberHere",
-      _id: "87654",
-    },
-  ];
+
+    eventData.singerAvailability = [];
     const selectOption = document.createElement("option");
     selectOption.innerText = "select";
     addSingerField.append(selectOption);
@@ -112,7 +84,7 @@ export function buildShiftContent(startTime, endTime, eventData, role, allUsers)
       (singer) => singer.primary === voiceSelected
     );
 
-    console.log("primaries: ",primaries)
+    console.log("primaries: ", primaries);
     for (let i = 0; i < primaries.length; i++) {
       const singer = document.createElement("option");
       singer.id = primaries[i]._id;
@@ -123,5 +95,5 @@ export function buildShiftContent(startTime, endTime, eventData, role, allUsers)
   });
 
   inputSingersRow.append(time, selectVoicePart, addSingerField);
-  shiftTable.append(inputSingersRow);
+  // shiftTable.append(inputSingersRow);
 }

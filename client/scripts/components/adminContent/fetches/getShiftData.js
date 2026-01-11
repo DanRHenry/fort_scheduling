@@ -3,6 +3,7 @@ export async function getShiftData(serverURL) {
 
         const URL = `${serverURL}/events/getallshiftdata${sessionStorage.token}`
 
+        console.log("URL: ",URL)
     const res = await fetch(URL, {
       method: "GET",
       mode: "cors",

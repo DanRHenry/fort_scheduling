@@ -1,15 +1,13 @@
+import { getUserInformation } from "./fetches/getUserInformation.js";
 import { updateUserAvailability } from "./fetches/updateUserAvailability.js";
 
 export async function openAvailabilityWindow(
   serverURL,
   event,
   title,
-  userData
+  userData,
+  block
 ) {
-  //   console.log(serverURL, event);
-  console.log(title);
-  console.log(userData);
-
   document.getElementById("availabilityWindow")?.remove();
 
   const availabilityWindow = document.createElement("div");
@@ -65,16 +63,34 @@ export async function openAvailabilityWindow(
 
     for (let i = 0; i < checkboxes.length; i++) {
       checkboxes[i].checked = toggleAllAvailable.checked;
-      updateUserAvailability(serverURL, checkboxes[i], userData, event._id, title);
+      updateUserAvailability(
+        serverURL,
+        checkboxes[i],
+        userData,
+        event._id,
+        title,
+        event,
+        block
+      );
 
       if (checkboxes[i].checked === false) {
-        document.getElementsByClassName("preferredTimeCheckboxes")[i].checked = false;
-      updateUserAvailability(serverURL, document.getElementsByClassName("preferredTimeCheckboxes")[i], userData, event._id, title);
+        document.getElementsByClassName("preferredTimeCheckboxes")[
+          i
+        ].checked = false;
+        updateUserAvailability(
+          serverURL,
+          document.getElementsByClassName("preferredTimeCheckboxes")[i],
+          userData,
+          event._id,
+          title,
+          event,
+          block
+        );
       }
     }
 
-    if (!toggleAllAvailable.checked){
-      checkAllTimePreferenceBoxes()
+    if (!toggleAllAvailable.checked) {
+      checkAllTimePreferenceBoxes();
     }
   });
 
@@ -96,12 +112,12 @@ export async function openAvailabilityWindow(
 
     for (let box of checkboxes) {
       box.checked = toggleAllPreferred.checked;
-      updateUserAvailability(serverURL, box, userData, event._id, title);
+      updateUserAvailability(serverURL, box, userData, event._id, title, event, block);
     }
 
     if (toggleAllPreferred.checked) {
-      if (document.getElementById("toggleAllAvailable").checked === false){
-        document.getElementById("toggleAllAvailable").click()
+      if (document.getElementById("toggleAllAvailable").checked === false) {
+        document.getElementById("toggleAllAvailable").click();
       }
     }
   });
@@ -113,7 +129,7 @@ export async function openAvailabilityWindow(
 
   toggleAllRow.append(toggleAllLabel, toggleAllPreferredLabel, blank);
 
-  availabilityWindow.append(dateHeader, availabilityHeadersRow, toggleAllRow);
+  availabilityWindow.append(dateHeader, toggleAllRow, availabilityHeadersRow);
 
   for (let i = 0; i < timeblocks.length; i++) {
     const scheduleSlot = document.createElement("div");
@@ -130,6 +146,8 @@ export async function openAvailabilityWindow(
     availabilityCheckbox.checked = true;
 
     availabilityCheckbox.addEventListener("change", () => {
+      block.style.backgroundColor = "red"
+      block.style.color = "white"
       if (availabilityCheckbox.checked === false) {
         document.getElementById(`preferredTimeCheckbox_${i}`).checked = false;
         updateUserAvailability(
@@ -137,7 +155,9 @@ export async function openAvailabilityWindow(
           document.getElementById(`preferredTimeCheckbox_${i}`),
           userData,
           event._id,
-          title
+          title,
+          event,
+          block
         );
       } else {
         document.getElementById(`preferredTimeCheckbox_${i}`).style.visibility =
@@ -148,7 +168,9 @@ export async function openAvailabilityWindow(
         availabilityCheckbox,
         userData,
         event._id,
-        title
+        title,
+        event,
+        block
       );
       checkAllAvailabilityBoxes();
     });
@@ -159,6 +181,8 @@ export async function openAvailabilityWindow(
     preferredTimeCheckbox.type = "checkbox";
 
     availabilityCheckbox.checked = true;
+
+    if (userData.user.events[event._id].availability && userData.user.events[event._id].availability[title]) {
 
     const events = userData.user.events[event._id].availability[title];
     for (let event in events) {
@@ -172,8 +196,10 @@ export async function openAvailabilityWindow(
         preferredTimeCheckbox.checked = events[event];
       }
     }
-
+  }
     preferredTimeCheckbox.addEventListener("change", () => {
+      block.style.backgroundColor = "red"
+      block.style.color = "white"
       if (preferredTimeCheckbox.checked === true) {
         document.getElementById(`availabilityCheckbox_${i}`).checked = true;
       }
@@ -182,7 +208,9 @@ export async function openAvailabilityWindow(
         preferredTimeCheckbox,
         userData,
         event._id,
-        title
+        title,
+        event,
+        block
       );
       checkAllTimePreferenceBoxes();
       checkAllAvailabilityBoxes();
@@ -221,14 +249,17 @@ export async function openAvailabilityWindow(
 
     if (!checkedAvailabilityBoxes.includes(false)) {
       document.getElementById("toggleAllAvailable").checked = true;
-    } 
-    
+      return true
+    }
+
     if (!checkedAvailabilityBoxes.includes(true)) {
       document.getElementById("toggleAllAvailable").checked = false;
+      return false
     }
 
     if (checkedAvailabilityBoxes.includes(false)) {
       document.getElementById("toggleAllAvailable").checked = false;
+      return false
     }
   }
 
@@ -248,18 +279,30 @@ export async function openAvailabilityWindow(
 
     if (!checkedTimePreferenceBoxes.includes(false)) {
       document.getElementById("toggleAllPreferred").checked = true;
-      console.log("no falses")
-    } 
-    
+      return true
+    }
+
     if (!checkedTimePreferenceBoxes.includes(true)) {
       document.getElementById("toggleAllPreferred").checked = false;
-      console.log("no trues")
+      return false
     }
 
     if (checkedTimePreferenceBoxes.includes(false)) {
       document.getElementById("toggleAllPreferred").checked = false;
+      return false
     }
-    console.log("here")
-    console.log(checkedTimePreferenceBoxes)
   }
-}
+
+  const update = await getUserInformation(serverURL)
+const updatedUserData = update.user
+console.log(updatedUserData)
+        if(updatedUserData.events[event._id].availability && updatedUserData.events[event._id].availability[title]){
+            block.style.backgroundColor = "red"
+            block.style.color = "white"
+          } else {
+            block.style.backgroundColor = "white"
+            block.style.color = "black"
+          }
+
+          }
+// }

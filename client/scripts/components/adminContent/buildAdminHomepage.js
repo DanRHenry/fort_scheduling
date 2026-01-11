@@ -2,12 +2,90 @@ import { createNewEvent } from "./fetches/createNewEvent.js";
 import { getAllEventsByAdmin } from "./fetches/getAllEventsByAdmin.js";
 import { buildEvent } from "./buildEvent.js";
 import { getAllUserData } from "./fetches/getAllUserData.js";
+import { updateUserProfile } from "../userContent/fetches/updateUserProfile.js";
 
 export async function buildAdminHomepage(serverURL, data) {
-  const allUsers = await getAllUserData(serverURL)
+  const allUsers = await getAllUserData(serverURL);
 
-//   console.log("admin page");
-//   console.table(data);
+  const eventListenerStatusObject = {};
+  document.addEventListener("click", function (e) {
+    // console.log(e.target);
+
+    let identifierArray = Array.from(e.target.id);
+
+    let adminNotesInputItem = document.getElementById(
+      identifierArray.slice(0, 16).join("") === "adminNotesInput_"
+    );
+
+    let adminNotesItem = document.getElementById(
+      identifierArray.slice(0, 11).join("") === "adminNotesInput_"
+    );
+
+    if (!adminNotesInputItem) {
+      if (e.target.className === "adminNotesInputs") {
+        if (eventListenerStatusObject.adminNotes) {
+          const updateAdminNotesBtn = document.createElement("button");
+          updateAdminNotesBtn.innerText = "submit";
+          updateAdminNotesBtn.id = "updateAdminNotesBtn";
+
+          if (!document.getElementById("updateAdminNotesBtn")) {
+            e.target.after(updateAdminNotesBtn);
+            updateAdminNotesBtn.addEventListener("click", () => {
+              const updateObject = { adminNotes: [e.target.value] };
+              updateUserProfile(
+                serverURL,
+                eventListenerStatusObject.adminNotes.userDataID,
+                updateObject
+              );
+
+              const adminNotesLabel = document.createElement("label");
+              adminNotesLabel.innerText = "Admin Notes: ";
+              adminNotesLabel.style.gridColumn = "span 2";
+              adminNotesLabel.id =
+                eventListenerStatusObject.adminNotes.adminNotesLabelID;
+              adminNotesLabel.className = "adminNotesLabels";
+              adminNotesLabel.setAttribute("for", eventListenerStatusObject.adminNotes.adminNotesID)
+
+              const adminNotes = document.createElement("div");
+              adminNotes.id = eventListenerStatusObject.adminNotes.adminNotesID;
+              adminNotes.className = "adminNotes";
+              // if (singer.adminNotes?.length > 0) {
+              adminNotes.innerText = e.target.value;
+              e.target.before(adminNotes);
+              e.target.remove();
+              updateAdminNotesBtn.remove();
+
+              adminNotes.addEventListener("click", function (e) {
+                let input;
+                input = document.createElement("textarea");
+                input.value = e.target.innerText;
+                input.className = "adminNotesInputs";
+                input.id = `adminNotesInput_${e.target.id.split("_")[1]}`;
+                console.log("converting admin notes to input");
+                eventListenerStatusObject.adminNotes = {
+                  userDataID: eventListenerStatusObject.adminNotes.userDataID,
+                  inputID: input.id,
+                  adminNotesID: e.target.id,
+                  adminNotesLabelID: adminNotesLabel.id,
+                };
+                e.target.before(input);
+                e.target.remove();
+              });
+              // } else {
+              // adminNotes.innerText = "";
+              // }
+            });
+          }
+        }
+      }
+
+      if (e.target.id === "updateAdminNotesBtn") {
+        console.log(e.target);
+      }
+    } else {
+      console.log(identifierArray.join(""));
+    }
+  });
 
   const body = document.querySelector("body");
   body.replaceChildren();
@@ -19,13 +97,15 @@ export async function buildAdminHomepage(serverURL, data) {
   calendarStartDateFieldLabel.setAttribute("for", "calendarStartDateField");
   calendarStartDateFieldLabel.innerText = "Start Date";
 
+  const date = new Date();
+
   const calendarStartDateField = document.createElement("input");
   calendarStartDateField.type = "date";
   calendarStartDateField.id = "calendarStartDateField";
   calendarStartDateField.name = "calendarStartDateField";
-  calendarStartDateField.min = "2025-11-01";
-  calendarStartDateField.max = "2025-12-24";
-  calendarStartDateField.value = "2025-11-01";
+  calendarStartDateField.min = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+  // calendarStartDateField.max = "2025-12-24";
+  calendarStartDateField.value = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
 
   const calendarEndDateFieldLabel = document.createElement("label");
   calendarEndDateFieldLabel.setAttribute("for", "calendarEndDateField");
@@ -35,9 +115,9 @@ export async function buildAdminHomepage(serverURL, data) {
   calendarEndDateField.type = "date";
   calendarEndDateField.id = "calendarEndDateField";
   calendarEndDateField.name = "calendarEndDateField";
-  calendarEndDateField.min = "2025-11-01";
-  calendarEndDateField.max = "2025-12-24";
-  calendarEndDateField.value = "2025-12-24";
+  calendarEndDateField.min = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+  // calendarEndDateField.max = "2025-12-24";
+  calendarEndDateField.value = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
 
   const startAndEndFormSubmitBtn = document.createElement("button");
   startAndEndFormSubmitBtn.innerText = "Submit";
@@ -59,7 +139,7 @@ export async function buildAdminHomepage(serverURL, data) {
       singerAvailability: [],
       dailySchedules: {},
       songList: [],
-      archived: false
+      archived: false,
     });
   });
 
@@ -97,8 +177,8 @@ export async function buildAdminHomepage(serverURL, data) {
 
   const eventData = await getAllEventsByAdmin(serverURL, sessionStorage.token);
 
-  console.log("first eventData: ",eventData)
-//   console.log(eventData.events);
+  // console.log("first eventData: ",eventData)
+  //   console.log(eventData.events);
 
   const eventTable = document.createElement("table");
   eventTable.id = "eventTable";
@@ -111,28 +191,31 @@ export async function buildAdminHomepage(serverURL, data) {
   const eventEndDate = document.createElement("th");
   eventEndDate.innerText = "End";
 
-
   eventHeaderLine.append(eventName, eventStartDate, eventEndDate);
   eventTable.append(eventHeaderLine);
 
-  const deleteTable = document.createElement("table")
-  deleteTable.id = "deleteTable"
-  const deleteHeaderRow = document.createElement("tr")
-  const deleteHeader = document.createElement("th")
-  deleteHeader.innerText = "Delete"
+  const deleteTable = document.createElement("table");
+  deleteTable.id = "deleteTable";
+  const deleteHeaderRow = document.createElement("tr");
+  const deleteHeader = document.createElement("th");
+  deleteHeader.innerText = "Delete";
 
-  deleteHeaderRow.append(deleteHeader)
-  deleteTable.append(deleteHeaderRow)
+  deleteHeaderRow.append(deleteHeader);
+  deleteTable.append(deleteHeaderRow);
 
   body.append(eventTable, deleteTable);
 
-  // console.log("allUsers",allUsers)
   for (let i = 0; i < eventData.events.length; i++) {
     const event = eventData.events[i];
-    buildEvent(event, eventData, serverURL, allUsers);
+    buildEvent(
+      event,
+      eventData,
+      serverURL,
+      allUsers,
+      eventListenerStatusObject
+    );
   }
 }
-
 
 /* 
 Start Date

@@ -1,7 +1,11 @@
 import { updateUserProfile } from "./updateUserProfile.js"
 
-export async function joinEvent(serverURL, userDataID, eventObject) {
+export async function joinEvent(serverURL, userDataID, eventObject, eventID) {
     console.log("eventObject: ",eventObject)
-updateUserProfile(serverURL, userDataID, {events: eventObject})
+    console.log("eventID",eventID)
+updateUserProfile(serverURL, userDataID, {
+    events: eventObject,
+    currentEvent: eventObject._id
+})
 window.location.reload()
 }

@@ -7,9 +7,8 @@ import { joinEvent } from "./fetches/joinEvent.js";
 import { buildEventAvailabilityCalendar } from "./buildEventAvailabilityCalendar.js";
 // import {getUserInformation} from "./fetches/getUserInformation.js"
 
-
 export async function buildUserHomepage(userData, serverURL) {
-  //   console.log(userData);
+    console.log(userData);
   const body = document.getElementsByTagName("body")[0];
   //   console.log(body)
 
@@ -19,7 +18,6 @@ export async function buildUserHomepage(userData, serverURL) {
   logoutBtn.addEventListener("click", () => {
     sessionStorage.removeItem("token");
 
-    const userData = "await" 
     window.location.reload();
   });
   body.append(logoutBtn);
@@ -76,7 +74,7 @@ export async function buildUserHomepage(userData, serverURL) {
   for (let element of Object.keys(data)) {
     let ignoreList = [
       "_id",
-      "comments",
+      "bio",
       "__v",
       "password",
       "role",
@@ -84,6 +82,7 @@ export async function buildUserHomepage(userData, serverURL) {
       "adminNotes",
       "imgURL",
       "events",
+      "currentEvent"
     ];
     if (!ignoreList.includes(element)) {
       const informationLabel = document.createElement("label");
@@ -128,39 +127,39 @@ export async function buildUserHomepage(userData, serverURL) {
   userName.id = "userName";
   userName.innerText = data.name;
 
-  const commentsSection = document.createElement("div");
-  commentsSection.id = "commentsSection";
+  const biographySection = document.createElement("div");
+  biographySection.id = "biographySection";
 
-  for (let i = 0; i < data.comments.length; i++) {
-    const commentParagraph = document.createElement("p");
-    commentParagraph.addEventListener("click", handleCommentParagraphClick);
-    commentParagraph.innerText = data.comments[i];
-    commentsSection.append(commentParagraph);
+  for (let i = 0; i < data.bio.length; i++) {
+    const bioParagraph = document.createElement("p");
+    bioParagraph.addEventListener("click", handleBioParagraphClick);
+    bioParagraph.innerText = data.bio[i];
+    biographySection.append(bioParagraph);
   }
 
-  const commentInputForm = document.createElement("textarea");
-  commentInputForm.id = "commentInputForm";
-  commentInputForm.placeholder = "Enter comments here";
+  const bioInputForm = document.createElement("textarea");
+  bioInputForm.id = "bioInputForm";
+  bioInputForm.placeholder = "Share your bio here";
 
-  const submitCommentBtn = document.createElement("button");
-  submitCommentBtn.id = "submitCommentBtn";
-  submitCommentBtn.innerText = "Submit";
-  submitCommentBtn.addEventListener("click", (e) => {
+  const submitBioBtn = document.createElement("button");
+  submitBioBtn.id = "submitBioBtn";
+  submitBioBtn.innerText = "Submit";
+  submitBioBtn.addEventListener("click", (e) => {
     e.preventDefault();
-    console.log("commentInputForm content: ", commentInputForm.value);
+    console.log("bioInputForm content: ", bioInputForm.value);
 
     updateUserProfile(serverURL, data._id, {
-      comments: [commentInputForm.value],
+      bio: [bioInputForm.value],
     });
-    const commentParagraph = document.createElement("p");
-    commentParagraph.innerText = commentInputForm.value;
-    commentInputForm.before(commentParagraph);
+    const bioParagraph = document.createElement("p");
+    bioParagraph.innerText = bioInputForm.value;
+    bioInputForm.before(bioParagraph);
   });
 
-  if (!data.comments) {
-    commentsSection.append(commentInputForm, submitCommentBtn);
+  if (!data.bio) {
+    biographySection.append(bioInputForm, submitBioBtn);
   }
-  body.append(imageForm, userInformationSection, commentsSection);
+  body.append(imageForm, userInformationSection, biographySection);
 
   function handleInformationClick() {
     let input;
@@ -272,19 +271,18 @@ export async function buildUserHomepage(userData, serverURL) {
       profileImage.src = imageURL;
 
       body.append(profileImage);
-      const confirmProfilePhotoBtn = document.createElement("button");
-      confirmProfilePhotoBtn.innerText = "Confirm Profile Photo";
-      confirmProfilePhotoBtn.id = "confirmProfilePhotoBtn";
-      confirmProfilePhotoBtn.style.display = "";
+      // const confirmProfilePhotoBtn = document.createElement("button");
+      // confirmProfilePhotoBtn.innerText = "Confirm Profile Photo";
+      // confirmProfilePhotoBtn.id = "confirmProfilePhotoBtn";
+      // confirmProfilePhotoBtn.style.display = "";
 
-      confirmProfilePhotoBtn.addEventListener("click", () => {
-        const updateObject = {};
-        updateObject.imgURL = selectPhoto.value;
+      // confirmProfilePhotoBtn.addEventListener("click", () => {
+      // });
+        const updateObject = {imgURL: selectPhoto.value};
         updateUserProfile(serverURL, data._id, updateObject);
-      });
 
       document.getElementById("confirmProfilePhotoBtn")?.remove();
-      selectPhoto.after(confirmProfilePhotoBtn);
+      // selectPhoto.after(confirmProfilePhotoBtn);
       document.getElementById("confirmProfilePhotoBtn").style.display = "";
       document.getElementById("imageForm").style.display = "none";
     });
@@ -292,39 +290,35 @@ export async function buildUserHomepage(userData, serverURL) {
     body.append(selectPhoto);
   }
 
-  async function handleCommentParagraphClick() {
+  async function handleBioParagraphClick() {
     const paragraph = this;
     const container = document.createElement("div");
 
     const inputLabel = document.createElement("label");
-    inputLabel.innerText = "Edit Comment";
-    inputLabel.setAttribute("for", "editCommentInput");
+    inputLabel.innerText = "Edit Bio";
+    inputLabel.setAttribute("for", "editBioInput");
 
     const input = document.createElement("textarea");
-    input.className = "editCommentParagraphFields";
+    input.className = "editBioParagraphFields";
     input.value = paragraph.innerText;
-    input.id = "editCommentInput";
-    input.name = "editCommentInput";
+    input.id = "editBioInput";
+    input.name = "editBioInput";
     input.before(inputLabel);
 
-    const updateCommentBtn = document.createElement("button");
-    updateCommentBtn.innerText = "Update";
+    const updateBioBtn = document.createElement("button");
+    updateBioBtn.innerText = "Update";
 
-    updateCommentBtn.addEventListener("click", () => {
+    updateBioBtn.addEventListener("click", () => {
       paragraph.innerText = input.value;
 
       updateUserProfile(serverURL, data._id, {
-        comments: [input.value],
+        bio: [input.value],
       });
       container.before(paragraph);
       container.remove();
     });
 
-    // console.log("input: ", input)
-    // input.append(updateCommentBtn)
-    // document.getElementById("commentsSection").append(updateCommentBtn);
-
-    container.append(input, updateCommentBtn);
+    container.append(input, updateBioBtn);
     paragraph.after(container);
 
     paragraph?.remove();
@@ -356,8 +350,15 @@ export async function buildUserHomepage(userData, serverURL) {
       eventsList.append(option);
     }
   }
-// console.log("userData: ",userData)
+  // console.log("userData: ",userData)
+
   eventsList.addEventListener("change", () => {
+    const eventWindows = document.getElementsByClassName("eventWindows");
+    document.getElementById("availabilityWindow")?.remove()
+    for (let eventWindow of eventWindows) {
+      eventWindow.remove();
+    }
+
     const selectedEvent = Array.from(eventsList.options).filter(
       (option) => option.selected
     );
@@ -367,22 +368,17 @@ export async function buildUserHomepage(userData, serverURL) {
     document.getElementById("joinEventButton")?.remove();
 
     if (selectedEvent[0].innerText !== "select") {
-      // console.log(allEvents[0]._id)
-      // console.log(userData.user?.events[eventID]);
-
       if (!userData.user?.events || !userData.user?.events[eventID]) {
         const joinEventButton = document.createElement("button");
         joinEventButton.id = "joinEventButton";
         joinEventButton.innerText = `Join ${selectedEvent[0].innerText} Group`;
         joinEventButton.addEventListener("click", () => {
           let eventObject = {};
-
-          // console.log(userData.user)
           if (userData.user.events) {
-            console.log("existing events")
+            console.log("existing events");
             eventObject = userData.user.events;
             if (!eventObject[eventID]) {
-              console.log("but no existing id")
+              console.log("but no existing id");
               eventObject[eventID] = {
                 name: selectedEvent[0].innerText,
                 id: eventID,
@@ -390,39 +386,51 @@ export async function buildUserHomepage(userData, serverURL) {
               };
             }
           } else {
-            console.log('no existing events')
-            eventObject = 
-            // {events: 
-              {[eventID]: {
+            console.log("no existing events");
+            eventObject = {
+              [eventID]: {
                 name: selectedEvent[0].innerText,
                 id: eventID,
-                availability: {}
-              }
-            // },
+                availability: {},
+              },
             };
           }
-          console.log("eventObject: ",eventObject)
+          console.log("eventObject: ", eventObject);
 
-          joinEvent(serverURL, userData.user._id, eventObject);
-          // const event = allEvents.filter((event) => event._id === eventID)[0];
-
-          // console.log("event: ", event);
-          // use event requirements to build calendar for availability
+          joinEvent(serverURL, userData.user._id, eventObject, eventID);
         });
 
         eventsList.after(joinEventButton);
       } else {
-        // console.log(userData.user._id);
-
-        // console.log("already a part of that group");
         const event = allEvents.filter((event) => event._id === eventID)[0];
+        updateUserProfile(serverURL, userData.user._id, {
+          currentEvent: event._id,
+        });
 
+        console.log("event: ",event)
         buildEventAvailabilityCalendar(serverURL, event, userData);
         // open existing availability and calendar for editing
         // there should be a flag to turn off availability on the admin end
       }
     }
   });
+
+
+    if (userData.user.currentEvent) {
+      // console.log(userData.user.currentEvent)
+      const events = Array.from(eventsList.options)
+
+      // console.log(events)
+        const event = allEvents.filter((event) => event._id === userData.user.currentEvent);
+
+        // console.log(event[0]._id)
+      if (event[0]?._id === userData.user.currentEvent){
+        buildEventAvailabilityCalendar(serverURL, event[0], userData);
+
+      }
+  }
+  
+
 
   // eventsList.addEventListener("")
   body.append(eventsListLabel, eventsList);
