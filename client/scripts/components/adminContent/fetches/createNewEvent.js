@@ -19,6 +19,7 @@ export async function createNewEvent(serverURL, eventBody) {
     const data = await res.json();
 
     if (data.message === "Success! New Event Entry Created!") {
+      location.reload()
       buildEvent(data.newEvent, [data.newEvent], serverURL)
     }
     console.log("data: ", data);

@@ -1,12 +1,17 @@
 import { buildShiftContent } from "../buildShiftContent.js";
 import { getShiftData } from "./getShiftData.js";
-
+import { openDate } from "../openDate.js";
+import { getAllEventsByAdmin} from "../fetches/getAllEventsByAdmin.js"
 export async function createShift(
   startTime,
   endTime,
   date,
   eventData,
-  serverURL
+  serverURL,
+  current,
+  months,
+  weekdays,
+  eventUsers
 ) {
   try {
     console.log("eventData: ", eventData.events);
@@ -34,9 +39,9 @@ export async function createShift(
     const existingShiftData = await getShiftData(serverURL);
     console.log(existingShiftData.events);
 
-    let dailySchedules = {}
+    let dailySchedules = {};
     if (existingShiftData.events[0].dailySchedules) {
-       dailySchedules = existingShiftData.events[0].dailySchedules;
+      dailySchedules = existingShiftData.events[0].dailySchedules;
     }
     // delete dailySchedules.empty;
 
@@ -63,6 +68,17 @@ export async function createShift(
     if (data.message === "Event entry has been updated successfully.") {
       console.log(data.message);
       console.log("updated data: ", data);
+      const eventData = await getAllEventsByAdmin(serverURL, sessionStorage.token);
+      
+      openDate(
+        serverURL,
+        eventData,
+        date,
+        current,
+        months,
+        weekdays,
+        eventUsers
+      );
     }
 
     //! after creating a new shift and patching the existing events, fetch the event data

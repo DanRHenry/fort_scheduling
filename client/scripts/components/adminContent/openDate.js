@@ -3,6 +3,7 @@ import { createShift } from "./fetches/createShift.js";
 import { getShiftData } from "./fetches/getShiftData.js";
 import { buildShiftContent } from "./buildShiftContent.js";
 import { deleteShift } from "./fetches/deleteShift.js";
+import { openShift } from "./openDateFunctions/openShift.js";
 
 export async function openDate(
   serverURL,
@@ -13,12 +14,12 @@ export async function openDate(
   weekdays,
   eventUsers
 ) {
-  console.log("Opening date...");
   const month = currentDate.slice(0, 2);
   const date = currentDate.slice(2, 4);
   const year = currentDate.slice(4, 8);
   const day = new Date(year, month, date).getDay();
 
+  document.getElementById("dateWindow")?.remove();
   const dateWindow = document.createElement("div");
   dateWindow.id = "dateWindow";
 
@@ -33,7 +34,8 @@ export async function openDate(
   };
 
   let shifts;
-
+  //todo!- add a refresh after creating a new event so this doesn't trigger an error
+  //todo - investigate undefined month issue when day is clicked
   if (!eventData.events[0].dailySchedules) {
     eventData.events[0].dailySchedules = {};
   }
@@ -78,17 +80,21 @@ export async function openDate(
   );
 
   function handleNewTimeEntrySubmitBtnClick() {
-    console.log(document.getElementById("newStartTimeEntry").value);
-    console.log(document.getElementById("newEndTimeEntry").value);
-    console.log(currentDate);
-    console.log(eventData);
-    console.log(serverURL);
+    // console.log(document.getElementById("newStartTimeEntry").value);
+    // console.log(document.getElementById("newEndTimeEntry").value);
+    // console.log(currentDate);
+    // console.log(eventData);
+    // console.log(serverURL);
     createShift(
       document.getElementById("newStartTimeEntry").value,
       document.getElementById("newEndTimeEntry").value,
       currentDate,
       eventData,
-      serverURL
+      serverURL,
+      current,
+      months,
+      weekdays,
+      eventUsers
     );
   }
 
@@ -127,9 +133,11 @@ export async function openDate(
   shiftTableHeaderRow.append(timeHeader);
   dateContent.append(newShiftEntryRow);
 
+  const calMonth = parseInt(month, 10).toString();
+
   const dateContentHeader = document.createElement("div");
   dateContentHeader.id = "dateContentHeader";
-  dateContentHeader.innerText = `${weekdays[day]} ${months[month]} ${date}, ${year}`;
+  dateContentHeader.innerText = `${weekdays[day]} ${months[calMonth]} ${date}, ${year}`;
 
   document.getElementById("dateWindow")?.remove();
   const shiftHeaderRow = document.createElement("div");
@@ -143,19 +151,74 @@ export async function openDate(
 
   // if (shifts?.length > 0) {
   // console.log("shifts: ", shifts);
-  for (let shift of shifts) {
+
+  for (let i = 0; i < shifts.length; i++) {
     const deleteShiftBtn = document.createElement("button");
     deleteShiftBtn.innerText = "X";
     deleteShiftBtn.addEventListener("click", (e) => {
       e.preventDefault();
-      deleteShift(serverURL, shift, eventData);
+      deleteShift(
+        serverURL,
+        shifts[i],
+        eventData,
+        currentDate,
+        current,
+        months,
+        weekdays,
+        eventUsers
+      );
     });
+
+    // console.log(
+    //   "eventData: ",
+    //   eventData,
+    //   "currentDate: ",
+    //   currentDate,
+    //   "current: ",
+    //   current,
+    //   "weekdays: ",
+    //   weekdays,
+    //   "eventUsers: ",
+    //   eventUsers
+    // );
+    const availableUsersSelection = document.createElement("select");
+    availableUsersSelection.id = `availableUsersSelection_${i}`;
+    availableUsersSelection.className = `availableUsersSelectors`;
+
+    for (let i = 0; i < eventUsers?.users?.length; i++) {
+      const singer = eventUsers.users[i];
+      const singerOption = document.createElement("option");
+      let secondaryPart = "";
+      if (singer.secondaryPart?.length > 0) {
+        secondaryPart = `/${singer.secondaryPart}`;
+      }
+      singerOption.innerText = `${singer.name} ${singer.primaryPart}${secondaryPart}`;
+      availableUsersSelection.append(singerOption);
+    }
+
+    const timeLabels = document.createElement("span")
+    timeLabels.className = "timeLabels"
+    timeLabels.innerText = `${shifts[i].startTime} - ${shifts[i].endTime}`
+    timeLabels.addEventListener("click", function (e) {
+      openShift(shifts[i]);
+    });
+
+    const addToShiftBtn = document.createElement("button")
+    addToShiftBtn.id = `addToShiftBtn_${i}`
+    addToShiftBtn.className = "addToShiftBtns"
+    addToShiftBtn.innerText = "+"
+
     const shiftRow = document.createElement("div");
-    shiftRow.innerText = "shift singerRow here";
-    shiftRow.append(deleteShiftBtn);
+    shiftRow.className = "shiftRows";
+    shiftRow.append(timeLabels)
+    shiftRow.append(availableUsersSelection);
     dateContent.append(shiftRow);
-    console.log(shifts);
-    console.log(shift);
+    shiftRow.append(addToShiftBtn);
+    shiftRow.append(deleteShiftBtn);
+
+    const shiftWindow = document.createElement("div")
+    shiftWindow.className = "shiftWindows"
+    shiftRow.after(shiftWindow)
   }
   // }
   /* 
@@ -178,29 +241,4 @@ export async function openDate(
 
 
     */
-
-  // if (eventData.events[0].dailySchedules) {
-  //   delete eventData.events[0].dailySchedules.empty;
-  // }
-
-  // if (eventData.events[0].dailySchedules) {
-  //   // console.log(eventData.events[0].dailySchedules)
-
-  // for (let shift in eventData.events[0].dailySchedules) {
-  //   // console.log("shift: ",shift)
-  //   // console.log(eventData.events[0].dailySchedules[shift]);
-
-  //   // if (eventData.events[0].dailySchedules[shift] !== "empty") {
-  //     if (eventData.events[0].dailySchedules[shift].date == currentDate) {
-  //       buildShiftContent(
-  //         eventData.events[0].dailySchedules[shift].startTime,
-  //         eventData.events[0].dailySchedules[shift].endTime,
-  //         eventData.events[0],
-  //         // groupNameSelection.value,
-  //         // eventUsers,
-  //       );
-  //       // }
-  //     }
-  //   }
-  // }
 }

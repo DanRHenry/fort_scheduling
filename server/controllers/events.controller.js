@@ -203,7 +203,7 @@ const updatedEvent = await Events.updateOne(record, {$unset: {[`dailySchedules.$
 if (updatedEvent){console.log("updatedEvent: ", updatedEvent)}
 updatedEvent
   ? res.status(200).json({
-    message: "success",
+    message: "Success, shift event removed!",
     updatedEvent
   })
   : res.status(404).json({
