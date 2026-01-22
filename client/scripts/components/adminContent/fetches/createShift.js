@@ -11,28 +11,22 @@ export async function createShift(
   current,
   months,
   weekdays,
-  eventUsers
+  eventUsers,
+  eventID
 ) {
   try {
     console.log("eventData: ", eventData.events);
-    // const group = document.getElementById("groupNameSelection").value;
+    console.log("startTime: ",startTime)
+    console.log("endTime: ",endTime)
+
     const shiftObject = {
       date: date,
       startTime: startTime,
       groups: [
-        // {
-        //   groupLeader: "",
-        //   groupColor: "",
-        //   sopranos: [],
-        //   altos: [],
-        //   tenors: [],
-        //   basses: [],
-        // },
       ],
       endTime: endTime,
       //add selected singers to this list after the event has been created
       //add groupLeader (selected) after the event has been created
-
       comments: [],
     };
 
@@ -43,14 +37,11 @@ export async function createShift(
     if (existingShiftData.events[0].dailySchedules) {
       dailySchedules = existingShiftData.events[0].dailySchedules;
     }
-    // delete dailySchedules.empty;
 
-    // console.log(dailySchedules);
-
+    
     dailySchedules[`${date}_${startTime}_${endTime}`] = shiftObject;
-
-    // console.log("dailySchedules: ", dailySchedules);
-    // console.log("eventID: ", existingShiftData.events[0]._id);
+    
+    console.log(dailySchedules)
     const URL = `${serverURL}/events/update${existingShiftData.events[0]._id}`;
 
     const updateData = await fetch(URL, {
@@ -64,12 +55,14 @@ export async function createShift(
     });
 
     const data = await updateData.json();
+    console.log("data: ",data)
 
     if (data.message === "Event entry has been updated successfully.") {
       console.log(data.message);
       console.log("updated data: ", data);
-      const eventData = await getAllEventsByAdmin(serverURL, sessionStorage.token);
-      
+      // const event = await getAllEventsByAdmin(serverURL, sessionStorage.token);
+      const eventData = {events: [data.updateEventRecord]}
+      console.log("new eventData: ",eventData)
       openDate(
         serverURL,
         eventData,
@@ -77,7 +70,8 @@ export async function createShift(
         current,
         months,
         weekdays,
-        eventUsers
+        eventUsers,
+        eventID
       );
     }
 
@@ -87,5 +81,3 @@ export async function createShift(
     console.error(err);
   }
 }
-
-//supermarket 3d

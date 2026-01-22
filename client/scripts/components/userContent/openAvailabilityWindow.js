@@ -1,5 +1,6 @@
 import { getUserInformation } from "./fetches/getUserInformation.js";
 import { updateUserAvailability } from "./fetches/updateUserAvailability.js";
+import { updateUserProfile } from "./fetches/updateUserProfile.js";
 
 export async function openAvailabilityWindow(
   serverURL,
@@ -152,7 +153,8 @@ export async function openAvailabilityWindow(
         document.getElementById(`preferredTimeCheckbox_${i}`).checked = false;
         updateUserAvailability(
           serverURL,
-          document.getElementById(`preferredTimeCheckbox_${i}`),
+          availabilityCheckbox,
+          // document.getElementById(`preferredTimeCheckbox_${i}`),
           userData,
           event._id,
           title,
@@ -226,6 +228,19 @@ export async function openAvailabilityWindow(
   const scheduleCommentInput = document.createElement("textarea");
   scheduleCommentInput.id = "scheduleCommentInput";
   scheduleCommentInput.name = "scheduleCommentInput";
+
+  const submitScheduleCommentBtn = document.createElement("button")
+  submitScheduleCommentBtn.className = `submitScheduleCommentBtns`
+  submitScheduleCommentBtn.addEventListener("click", () => {
+    if (scheduleCommentInput.value?.length > 0) {
+      const shiftCommentContent = shiftCommentContent.value;
+      updateUserProfile(serverURL, )
+
+      /* 
+      serverURL, userDataID, updateObject
+      */
+    }
+  })
 
   availabilityWindow.append(commentLabel, scheduleCommentInput);
   document.getElementsByTagName("body")[0].append(availabilityWindow);

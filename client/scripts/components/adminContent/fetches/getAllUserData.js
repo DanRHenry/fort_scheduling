@@ -1,20 +1,23 @@
 export async function getAllUserData(serverURL) {
+  try {
+    const url = `${serverURL}/user/`;
 
-    const url = `${serverURL}/user/`
-
-    console.log("url: ", url)
+    // console.log("url: ", url)
     const res = await fetch(url, {
-        method: "GET",
-        mode: "cors",
-        headers: {
-            "content-type": "application/JSON",
-            "authorization": sessionStorage.token
-        }
-    })
+      method: "GET",
+      mode: "cors",
+      headers: {
+        "content-type": "application/JSON",
+        authorization: sessionStorage.token,
+      },
+    });
 
-    const data = await res.json()
+    const data = await res.json();
 
     // console.log(data)
 
-    return data
+    return data;
+  } catch (err) {
+    console.error(err);
+  }
 }

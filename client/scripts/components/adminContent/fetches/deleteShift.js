@@ -1,25 +1,28 @@
 import { getAllEventsByAdmin } from "../fetches/getAllEventsByAdmin.js";
 import { openDate } from "../openDate.js";
+import { getShiftData } from "./getShiftData.js";
 
 export async function deleteShift(
+  startTime,
+  endTime,
+  date,
   serverURL,
-  shiftInfo,
+  shiftID,
   eventData,
   currentDate,
   current,
   months,
   weekdays,
-  eventUsers
+  eventUsers,
+  eventID
 ) {
-  try {
+  try {    
     const eventID = eventData.events[0]._id;
-    const shiftID = `${shiftInfo.date}_${shiftInfo.startTime}_${shiftInfo.endTime}`;
 
     const URL = `${serverURL}/events/removeshift/${eventID}/${shiftID}`;
 
-    // const URL = `${serverURL}/events/removeshift`
     const res = await fetch(URL, {
-      method: "DELETE",
+      method: "PATCH",
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
@@ -31,20 +34,24 @@ export async function deleteShift(
 
     if (data.message === "Success, shift event removed!") {
       console.log("deleted shift entry :)");
+      console.log(data);
 
-      const eventData = await getAllEventsByAdmin(
-        serverURL,
-        sessionStorage.token
-      );
+    let updatedData = eventData.events[0]
+    updatedData.dailySchedules = data.updateEventRecord.dailySchedules
 
+    let updatedEvent = eventData
+    updatedEvent.events[0] = updatedData
+
+    console.log(updatedEvent)
       openDate(
         serverURL,
-        eventData,
+        updatedEvent,
         currentDate,
         current,
         months,
         weekdays,
-        eventUsers
+        eventUsers,
+        eventID
       );
     }
     // console.log(data);

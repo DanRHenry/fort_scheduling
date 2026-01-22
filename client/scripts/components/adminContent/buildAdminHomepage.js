@@ -207,6 +207,7 @@ export async function buildAdminHomepage(serverURL, data) {
 
   for (let i = 0; i < eventData.events.length; i++) {
     const event = eventData.events[i];
+    // console.log("event: ", event)
     buildEvent(
       event,
       eventData,

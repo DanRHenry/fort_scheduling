@@ -1,4 +1,7 @@
 export async function getPhoto(serverURL, photoName, userID) {
+    if (!photoName) {
+        return
+    }
     // console.log(serverURL)
     // console.log(photoName)
     // console.log(userID)

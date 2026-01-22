@@ -344,3 +344,11 @@ font-size: clamp(8px, .7rem, 2rem);
     grid-template-columns: repeat(4, 1fr);
     text-align: right;
 }
+
+.shiftWindows{
+    border: 1px solid black;
+}
+
+.shiftWindows > img, #profileImage{
+    width: 13rem;
+}
