@@ -77,6 +77,7 @@ if (preferenceCheck) {
   }
 }
 
+console.log("eventsObject: ",eventsObject)
   updateUserProfile(serverURL, userData.user._id, {
     events: eventsObject,
   });

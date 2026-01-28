@@ -92,12 +92,13 @@ export async function openAvailabilityWindow(
           false;
         updateUserAvailability(
           serverURL,
-          document.getElementsByClassName("preferredTimeCheckboxes")[i],
+          "",
           userData,
           event._id,
           title,
           event,
           block,
+          document.getElementsByClassName("preferredTimeCheckboxes")[i],
         );
       }
     }
@@ -200,6 +201,7 @@ export async function openAvailabilityWindow(
         title,
         event,
         block,
+        document.getElementById(`preferredTimeCheckbox_${i}`)
       );
       checkAllAvailabilityBoxes();
     });
@@ -224,6 +226,16 @@ export async function openAvailabilityWindow(
       block.style.color = "white";
       if (preferredTimeCheckbox.checked === true) {
         document.getElementById(`availabilityCheckbox_${i}`).checked = true;
+        updateUserAvailability(
+        serverURL,
+        document.getElementById(`availabilityCheckbox_${i}`),
+        userData,
+        event._id,
+        title,
+        event,
+        block,
+        "",
+        )
       }
       updateUserAvailability(
         serverURL,

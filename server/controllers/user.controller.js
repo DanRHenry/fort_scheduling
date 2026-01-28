@@ -159,10 +159,11 @@ router.get("/find", requireValidation, async (req, res) => {
 router.patch("/update:id", requireValidation, async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(id);
+    // console.log("--------------------")
+    // console.log(id);
 
     const update = req.body;
-    console.log(update);
+    // console.log("update: ",update);
 
     const findUser = await User.findOne({ _id: id });
 
@@ -174,7 +175,7 @@ router.patch("/update:id", requireValidation, async (req, res) => {
 
     const updatedUser = await User.findOneAndUpdate({ _id: id }, update);
 
-    console.log(updatedUser);
+    // console.log(updatedUser);
 
     updatedUser
       ? res.status(200).json({
