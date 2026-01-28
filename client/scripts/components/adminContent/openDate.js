@@ -14,7 +14,7 @@ export async function openDate(
   months,
   weekdays,
   eventUsers,
-  eventID
+  eventID,
 ) {
   console.log("eventID: ", eventID);
   const month = currentDate.slice(0, 2);
@@ -58,7 +58,7 @@ export async function openDate(
   }
 
   shifts = Object.values(eventData.events[0].dailySchedules).filter(
-    (schedule) => schedule.date === currentDate
+    (schedule) => schedule.date === currentDate,
   );
 
   const dateContent = document.createElement("div");
@@ -110,7 +110,7 @@ export async function openDate(
   newTimeEntrySubmitBtn.id = "newTimeEntrySubmitBtn";
   newTimeEntrySubmitBtn.addEventListener(
     "click",
-    handleNewTimeEntrySubmitBtnClick
+    handleNewTimeEntrySubmitBtnClick,
   );
 
   function handleNewTimeEntrySubmitBtnClick() {
@@ -127,7 +127,7 @@ export async function openDate(
         months,
         weekdays,
         eventUsers,
-        eventID
+        eventID,
       );
     }
   }
@@ -148,7 +148,7 @@ export async function openDate(
     newStartTimeEntry,
     newEndTimeEntryLabel,
     newEndTimeEntry,
-    newTimeEntrySubmitBtn
+    newTimeEntrySubmitBtn,
   );
 
   shiftTableHeaderRow.append(timeHeader);
@@ -168,7 +168,7 @@ export async function openDate(
 
   document.querySelector("body").append(dateWindow);
 
-  console.log("shifts: ",shifts)
+  console.log("shifts: ", shifts);
   let sorted = [];
   for (let i = 0; i < shifts.length; i++) {
     let startHourAndMin = shifts[i].startTime.split(":");
@@ -192,11 +192,10 @@ export async function openDate(
   });
 
   for (let i = 0; i < sorted.length; i++) {
-
     // console.log("sorted: ", sorted);
-    let startTime = (sorted[i].time[1][0]).join(":");
-    let endTime = (sorted[i].time[1][1]).join(":");
-    
+    let startTime = sorted[i].time[1][0].join(":");
+    let endTime = sorted[i].time[1][1].join(":");
+
     const shiftID = `${currentDate}_${startTime}_${endTime}`;
 
     const deleteShiftBtn = document.createElement("button");
@@ -215,7 +214,7 @@ export async function openDate(
         months,
         weekdays,
         eventUsers,
-        eventID
+        eventID,
       );
     });
 
@@ -227,22 +226,50 @@ export async function openDate(
     availableUsersSelection.className = `availableUsersSelectors`;
     availableUsersSelection.addEventListener(
       "change",
-      openAvailableSingerProfile
+      openAvailableSingerProfile,
     );
 
     const singerOption = document.createElement("option");
     singerOption.innerText = "select singer";
     availableUsersSelection.append(singerOption);
 
+    // console.log("eventUsers: ", eventUsers)
     for (let j = 0; j < eventUsers?.users?.length; j++) {
       const singer = eventUsers.users[j];
+      const eventDate = `${months[calMonth]} ${date}, ${year}`;
+
       if (!singer.events) {
+        if (singer.role === "admin") {
+          console.log("admin");
+        } else {
+          console.log("no events found");
+        }
         continue;
       }
+
+      if (!singer.events[eventID]) {
+        console.log("no eventID found");
+        continue;
+      }
+
+      if (!singer.events[eventID].availability) {
+        if (singer.role === "admin") {
+          console.log("admin");
+        } else {
+          console.log("no daily schedules found");
+        }
+        continue;
+      }
+
+      if (!singer.events[eventID].availability[eventDate]) {
+        console.log("no shift information found");
+        console.log("eventDate: ", eventDate);
+        console.log(singer.events[eventID].availability);
+        continue;
+      }
+
+      // console.log("singer: ", singer);
       const singerEventInformation = singer.events[eventID];
-      // console.log(eventID)
-      // console.log(singer.events)
-      // console.log(singerEventInformation)
       const singerEventAvailability = singerEventInformation.availability;
       const shiftDayAvailability =
         singerEventInformation.availability[
@@ -253,34 +280,41 @@ export async function openDate(
       const shiftPreferredTimesObject = {};
 
       for (let i = 0; i < 40; i++) {
-        shiftAvailabilityObject[
-          startTimeOptions[i]
-        ] = `availabilityCheckbox_${i}`;
-        shiftPreferredTimesObject[
-          startTimeOptions[i]
-        ] = `preferredTimeCheckbox_${i}`;
+        shiftAvailabilityObject[startTimeOptions[i]] =
+          `availabilityCheckbox_${i}`;
+        shiftPreferredTimesObject[startTimeOptions[i]] =
+          `preferredTimeCheckbox_${i}`;
       }
 
-      const startIndex = startTimeOptions.indexOf(start.startTime);
-      const endIndex = startTimeOptions.indexOf(end.endTime);
+      const startIndex = startTimeOptions.indexOf(start.time[1][0].join(":")); //sets the starting point within all possible start times for what the shift actually calls for
+      const endIndex = startTimeOptions.indexOf(end.time[1][1].join(":"));
 
-      const shiftTimeRange = startTimeOptions.slice(startIndex, endIndex);
+      const shiftTimeRange = startTimeOptions.slice(startIndex, endIndex); //contains all shift times, as set by the admin
 
-      const eventDate = `${months[calMonth]} ${date}, ${year}`;
+      // console.log(shiftTimeRange);
+
       let counter = 0;
+      //! because the singers click boxes that span 1 hour segments, they won't directly line up with the admin's timeslots, which span 15 minutes
+      let availabilityRangeIndex = 0;
       for (let i = 0; i < shiftTimeRange.length; i++) {
-        const shiftTimeSectionNeeded = shiftTimeRange[i];
-        const userShiftStatus =
-          singerEventAvailability[eventDate][
-            shiftAvailabilityObject[shiftTimeSectionNeeded]
-          ];
-        if (userShiftStatus === false) {
-          continue;
-        } else {
+        if (i > 0 && i % 4 === 0) {
+          availabilityRangeIndex++;
+        }
+        const shiftTimeSectionNeeded =
+          shiftAvailabilityObject[shiftTimeRange[availabilityRangeIndex]];
+
+        const allSingerShiftAvailability = singerEventAvailability[eventDate];
+        // console.log("==================")
+
+        if (allSingerShiftAvailability[shiftTimeSectionNeeded] === true) {
           counter++;
         }
       }
 
+      // console.log("shiftTimeRangeLength: ", shiftTimeRange.length);
+      // console.log("counter: ", counter);
+      // console.log("singer: ",singer.name, "availability: ",singerEventAvailability[eventDate])
+      // console.log("_________________________________")
       if (counter === shiftTimeRange.length) {
         const singerOption = document.createElement("option");
         singerOption.id = singer._id;
@@ -327,7 +361,7 @@ export async function openDate(
       }
 
       const selectedSinger = Array.from(availableUsersSelection.options).filter(
-        (option) => option.selected
+        (option) => option.selected,
       );
 
       const id = selectedSinger[0].id;
@@ -337,12 +371,10 @@ export async function openDate(
       buildShiftSingerInformationWindow(
         serverURL,
         selected,
-        document.getElementsByClassName("shiftWindows")[0]
+        document.getElementsByClassName("shiftWindows")[0],
       );
     }
   }
-
-
 
   // }
   /* 

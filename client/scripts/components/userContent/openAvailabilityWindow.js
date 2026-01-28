@@ -7,7 +7,7 @@ export async function openAvailabilityWindow(
   event,
   title,
   userData,
-  block
+  block,
 ) {
   document.getElementById("availabilityWindow")?.remove();
 
@@ -25,6 +25,19 @@ export async function openAvailabilityWindow(
     "7:00-8:00",
     "8:00-9:00",
     "9:00-10:00",
+  ];
+
+  const hours = [
+    "12:00",
+    "1:00",
+    "2:00",
+    "3:00",
+    "4:00",
+    "5:00",
+    "6:00",
+    "7:00",
+    "8:00",
+    "9:00",
   ];
 
   const availabilityHeadersRow = document.createElement("div");
@@ -59,7 +72,7 @@ export async function openAvailabilityWindow(
   toggleAllAvailable.type = "checkbox";
   toggleAllAvailable.addEventListener("click", () => {
     const checkboxes = document.getElementsByClassName(
-      "availabilityCheckboxes"
+      "availabilityCheckboxes",
     );
 
     for (let i = 0; i < checkboxes.length; i++) {
@@ -71,13 +84,12 @@ export async function openAvailabilityWindow(
         event._id,
         title,
         event,
-        block
+        block,
       );
 
       if (checkboxes[i].checked === false) {
-        document.getElementsByClassName("preferredTimeCheckboxes")[
-          i
-        ].checked = false;
+        document.getElementsByClassName("preferredTimeCheckboxes")[i].checked =
+          false;
         updateUserAvailability(
           serverURL,
           document.getElementsByClassName("preferredTimeCheckboxes")[i],
@@ -85,7 +97,7 @@ export async function openAvailabilityWindow(
           event._id,
           title,
           event,
-          block
+          block,
         );
       }
     }
@@ -108,12 +120,21 @@ export async function openAvailabilityWindow(
   toggleAllPreferred.name = "toggleAllPreferred";
   toggleAllPreferred.addEventListener("click", () => {
     const checkboxes = document.getElementsByClassName(
-      "preferredTimeCheckboxes"
+      "preferredTimeCheckboxes",
     );
 
     for (let box of checkboxes) {
       box.checked = toggleAllPreferred.checked;
-      updateUserAvailability(serverURL, box, userData, event._id, title, event, block);
+      updateUserAvailability(
+        serverURL,
+        "",
+        userData,
+        event._id,
+        title,
+        event,
+        block,
+        box
+      );
     }
 
     if (toggleAllPreferred.checked) {
@@ -143,23 +164,29 @@ export async function openAvailabilityWindow(
     availabilityCheckbox.className = "availabilityCheckboxes";
     availabilityCheckbox.type = "checkbox";
 
-    // console.log(userData.user.events);
-    availabilityCheckbox.checked = true;
+    availabilityCheckbox.checked = false;
+    if (
+      userData.user.events[event._id].availability &&
+      userData.user.events[event._id].availability[title]
+    ) {
+      availabilityCheckbox.checked =
+        userData.user.events[event._id].availability[title][hours[i]];
+    }
 
     availabilityCheckbox.addEventListener("change", () => {
-      block.style.backgroundColor = "red"
-      block.style.color = "white"
+      block.style.backgroundColor = "red";
+      block.style.color = "white";
       if (availabilityCheckbox.checked === false) {
         document.getElementById(`preferredTimeCheckbox_${i}`).checked = false;
         updateUserAvailability(
           serverURL,
           availabilityCheckbox,
-          // document.getElementById(`preferredTimeCheckbox_${i}`),
           userData,
           event._id,
           title,
           event,
-          block
+          block,
+          document.getElementById(`preferredTimeCheckbox_${i}`)
         );
       } else {
         document.getElementById(`preferredTimeCheckbox_${i}`).style.visibility =
@@ -172,7 +199,7 @@ export async function openAvailabilityWindow(
         event._id,
         title,
         event,
-        block
+        block,
       );
       checkAllAvailabilityBoxes();
     });
@@ -182,37 +209,31 @@ export async function openAvailabilityWindow(
     preferredTimeCheckbox.className = "preferredTimeCheckboxes";
     preferredTimeCheckbox.type = "checkbox";
 
-    availabilityCheckbox.checked = true;
-
-    if (userData.user.events[event._id].availability && userData.user.events[event._id].availability[title]) {
-
-    const events = userData.user.events[event._id].availability[title];
-    for (let event in events) {
-      // console.log(event);
-      // console.log(events[event]);
-      // console.log(document.getElementById(event));
-      if (availabilityCheckbox.id === event) {
-        availabilityCheckbox.checked = events[event];
-      }
-      if (preferredTimeCheckbox.id === event) {
-        preferredTimeCheckbox.checked = events[event];
-      }
+    if (
+      userData.user.events[event._id].preferences &&
+      userData.user.events[event._id].preferences[title]
+    ) {
+      preferredTimeCheckbox.checked =
+        userData.user.events[event._id].preferences[title][hours[i]];
     }
-  }
+
+    // preferredTimeCheckbox.checked = userData.user.events[event._id].preferences[title][hours[i]]
+
     preferredTimeCheckbox.addEventListener("change", () => {
-      block.style.backgroundColor = "red"
-      block.style.color = "white"
+      block.style.backgroundColor = "red";
+      block.style.color = "white";
       if (preferredTimeCheckbox.checked === true) {
         document.getElementById(`availabilityCheckbox_${i}`).checked = true;
       }
       updateUserAvailability(
         serverURL,
-        preferredTimeCheckbox,
+        "",
         userData,
         event._id,
         title,
         event,
-        block
+        block,
+        preferredTimeCheckbox,
       );
       checkAllTimePreferenceBoxes();
       checkAllAvailabilityBoxes();
@@ -229,18 +250,14 @@ export async function openAvailabilityWindow(
   scheduleCommentInput.id = "scheduleCommentInput";
   scheduleCommentInput.name = "scheduleCommentInput";
 
-  const submitScheduleCommentBtn = document.createElement("button")
-  submitScheduleCommentBtn.className = `submitScheduleCommentBtns`
+  const submitScheduleCommentBtn = document.createElement("button");
+  submitScheduleCommentBtn.className = `submitScheduleCommentBtns`;
   submitScheduleCommentBtn.addEventListener("click", () => {
     if (scheduleCommentInput.value?.length > 0) {
       const shiftCommentContent = shiftCommentContent.value;
-      updateUserProfile(serverURL, )
-
-      /* 
-      serverURL, userDataID, updateObject
-      */
+      updateUserProfile(serverURL);
     }
-  })
+  });
 
   availabilityWindow.append(commentLabel, scheduleCommentInput);
   document.getElementsByTagName("body")[0].append(availabilityWindow);
@@ -250,7 +267,7 @@ export async function openAvailabilityWindow(
 
   function checkAllAvailabilityBoxes() {
     const availabilityCheckboxes = Array.from(
-      document.getElementsByClassName("availabilityCheckboxes")
+      document.getElementsByClassName("availabilityCheckboxes"),
     );
 
     const checkedAvailabilityBoxes = [];
@@ -264,23 +281,23 @@ export async function openAvailabilityWindow(
 
     if (!checkedAvailabilityBoxes.includes(false)) {
       document.getElementById("toggleAllAvailable").checked = true;
-      return true
+      return true;
     }
 
     if (!checkedAvailabilityBoxes.includes(true)) {
       document.getElementById("toggleAllAvailable").checked = false;
-      return false
+      return false;
     }
 
     if (checkedAvailabilityBoxes.includes(false)) {
       document.getElementById("toggleAllAvailable").checked = false;
-      return false
+      return false;
     }
   }
 
   function checkAllTimePreferenceBoxes() {
     const timePreferenceCheckboxes = Array.from(
-      document.getElementsByClassName("preferredTimeCheckboxes")
+      document.getElementsByClassName("preferredTimeCheckboxes"),
     );
 
     const checkedTimePreferenceBoxes = [];
@@ -294,30 +311,32 @@ export async function openAvailabilityWindow(
 
     if (!checkedTimePreferenceBoxes.includes(false)) {
       document.getElementById("toggleAllPreferred").checked = true;
-      return true
+      return true;
     }
 
     if (!checkedTimePreferenceBoxes.includes(true)) {
       document.getElementById("toggleAllPreferred").checked = false;
-      return false
+      return false;
     }
 
     if (checkedTimePreferenceBoxes.includes(false)) {
       document.getElementById("toggleAllPreferred").checked = false;
-      return false
+      return false;
     }
   }
 
-  const update = await getUserInformation(serverURL)
-const updatedUserData = update.user
-console.log(updatedUserData)
-        if(updatedUserData.events[event._id].availability && updatedUserData.events[event._id].availability[title]){
-            block.style.backgroundColor = "red"
-            block.style.color = "white"
-          } else {
-            block.style.backgroundColor = "white"
-            block.style.color = "black"
-          }
-
-          }
+  const update = await getUserInformation(serverURL);
+  const updatedUserData = update.user;
+  console.log(updatedUserData);
+  if (
+    updatedUserData.events[event._id].availability &&
+    updatedUserData.events[event._id].availability[title]
+  ) {
+    block.style.backgroundColor = "red";
+    block.style.color = "white";
+  } else {
+    block.style.backgroundColor = "white";
+    block.style.color = "black";
+  }
+}
 // }
