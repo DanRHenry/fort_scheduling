@@ -163,7 +163,7 @@ router.patch("/update:id", requireValidation, async (req, res) => {
     // console.log(id);
 
     const update = req.body;
-    // console.log("update: ",update);
+    console.log("update: ",update);
 
     const findUser = await User.findOne({ _id: id });
 

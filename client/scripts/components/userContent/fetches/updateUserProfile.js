@@ -12,7 +12,6 @@ export async function updateUserProfile(serverURL, userDataID, updateObject) {
     })
 
     const data = await res.json()
-    console.log(data.message)
     } catch(err){
         console.error(err)
     }

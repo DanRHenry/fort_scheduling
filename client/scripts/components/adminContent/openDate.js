@@ -1,9 +1,7 @@
-import { openSingerInformation } from "./openDateFunctions/openSingerInformation.js";
 import { createShift } from "./fetches/createShift.js";
-import { getShiftData } from "./fetches/getShiftData.js";
-import { buildShiftContent } from "./buildShiftContent.js";
 import { deleteShift } from "./fetches/deleteShift.js";
 import { openShift } from "./openDateFunctions/openShift.js";
+import { addSingerToSchedule } from "./openDateFunctions/addSingerToSchedule.js";
 import { buildShiftSingerInformationWindow } from "./buildShiftSingerInformationWindow.js";
 
 export async function openDate(
@@ -16,51 +14,30 @@ export async function openDate(
   eventUsers,
   eventID,
 ) {
-  console.log("eventID: ", eventID);
+  // console.log("eventID: ", eventID);
   const month = currentDate.slice(0, 2);
   const date = currentDate.slice(2, 4);
   const year = currentDate.slice(4, 8);
   const day = new Date(year, month, date).getDay();
+  const calMonth = parseInt(month, 10).toString();
 
-  const startTimeOptions = ["12:00", "12:15", "12:30", "12:45"];
-  const endTimeOptions = ["12:15", "12:30", "12:45"];
-  const quarterHours = ["00", "15", "30", "45"];
-  let j = 1;
-  for (let i = 1; i < 38; i++) {
-    startTimeOptions.push(`${j % 12}:${quarterHours[(i - 1) % 4]}`);
-    endTimeOptions.push(`${j % 12}:${quarterHours[(i - 1) % 4]}`);
-    if (i % 4 === 0) {
-      j++;
-    }
-  }
-  startTimeOptions.pop();
+  const eventDate = `${months[calMonth]} ${date}, ${year}`;
+
+  const { startTimeOptions, endTimeOptions } = createStartAndEndTimes();
 
   document.getElementById("dateWindow")?.remove();
   const dateWindow = document.createElement("div");
   dateWindow.id = "dateWindow";
 
-  const groupNameSelectionLabel = document.createElement("label");
-  groupNameSelectionLabel.setAttribute("for", "groupNameSelection");
-  groupNameSelectionLabel.innerText = "Select group ";
-
-  const colorsList = {
-    red: { backgroundColor: "red", fontColor: "white" },
-    green: { backgroundColor: "green", fontColor: "white" },
-    gold: { backgroundColor: "rgb(204, 174, 3)", fontColor: "black" },
-  };
-
-  let shifts;
-
-  //todo!- add a refresh after creating a new event so this doesn't trigger an error
-  //todo - investigate undefined month issue when day is clicked
   if (!eventData.events[0].dailySchedules) {
     eventData.events[0].dailySchedules = {};
   }
 
-  shifts = Object.values(eventData.events[0].dailySchedules).filter(
+  let shifts = Object.values(eventData.events[0].dailySchedules).filter(
     (schedule) => schedule.date === currentDate,
   );
 
+  //! build create new shift line
   const dateContent = document.createElement("div");
   dateContent.id = "dateContent";
 
@@ -84,7 +61,6 @@ export async function openDate(
     while (newEndTimeEntry.firstChild) {
       newEndTimeEntry.firstChild.remove();
     }
-
     for (
       let i = startTimeOptions.indexOf(newStartTimeEntry.value);
       i < endTimeOptions.length;
@@ -113,25 +89,6 @@ export async function openDate(
     handleNewTimeEntrySubmitBtnClick,
   );
 
-  function handleNewTimeEntrySubmitBtnClick() {
-    const startTime = document.getElementById("newStartTimeEntry").value;
-    const endTime = document.getElementById("newEndTimeEntry").value;
-    if (startTime !== "select" && endTime !== "select" && endTime) {
-      createShift(
-        startTime,
-        endTime,
-        currentDate,
-        eventData,
-        serverURL,
-        current,
-        months,
-        weekdays,
-        eventUsers,
-        eventID,
-      );
-    }
-  }
-
   for (let i = 0; i < startTimeOptions.length; i++) {
     const startTimeOption = document.createElement("option");
     if (i === 0) {
@@ -154,7 +111,7 @@ export async function openDate(
   shiftTableHeaderRow.append(timeHeader);
   dateContent.append(newShiftEntryRow);
 
-  const calMonth = parseInt(month, 10).toString();
+  //! Build Event Header
 
   const dateContentHeader = document.createElement("div");
   dateContentHeader.id = "dateContentHeader";
@@ -177,7 +134,6 @@ export async function openDate(
       adjustedStartTime[0] = Number(adjustedStartTime[0]) + 12;
     }
     const startTime = adjustedStartTime.join("");
-    // const startTime = new Date('1970-01-01 ' + `${startHourAndMin[0]}:${startHourAndMin[1]}:00`).getTime()
 
     let endHourAndMin = shifts[i].endTime.split(":");
 
@@ -188,15 +144,98 @@ export async function openDate(
   }
 
   sorted.sort((a, b) => {
+    if (a.time[0][0] === b.time[0][0]) {
+      let endTimeA;
+      if (a.time[1][1][0] < 12) {
+        endTimeA = (Number(a.time[1][1][0]) + 12).toString() + a.time[1][1][1];
+      } else {
+        endTimeA = a.time[1][1][0] + a.time[1][1][1];
+      }
+      let endTimeB;
+      if (b.time[1][1][0] < 12) {
+        endTimeB = (Number(b.time[1][1][0]) + 12).toString() + b.time[1][1][1];
+      } else {
+        endTimeB = b.time[1][1][0] + b.time[1][1][1];
+      }
+      return endTimeA.localeCompare(endTimeB);
+    }
     return a.time[0][0].localeCompare(b.time[0][0]);
   });
 
-  for (let i = 0; i < sorted.length; i++) {
-    // console.log("sorted: ", sorted);
-    let startTime = sorted[i].time[1][0].join(":");
-    let endTime = sorted[i].time[1][1].join(":");
+  let startTime;
+  let endTime;
+  let start;
+  let end;
+  let startIndex;
+  let endIndex;
 
-    const shiftID = `${currentDate}_${startTime}_${endTime}`;
+  const shiftID = `${currentDate}_${startTime}_${endTime}`;
+
+  for (let i = 0; i < sorted.length; i++) {
+    startTime = sorted[i].time[1][0].join(":");
+    endTime = sorted[i].time[1][1].join(":");
+
+    start = sorted[i];
+    end = sorted[i];
+
+    startIndex = startTimeOptions.indexOf(start.time[1][0].join(":")); //sets the starting point within all possible start times for what the shift actually calls for
+    endIndex = startTimeOptions.indexOf(end.time[1][1].join(":"));
+
+    //! select available users dropdown
+    const availableUsersSelection = document.createElement("select");
+    availableUsersSelection.id = `availableUsersSelection_${i}`;
+    availableUsersSelection.className = `availableUsersSelectors`;
+    const shiftTime = `${sorted[i].time[1][0].join(":")} - ${sorted[
+      i
+    ].time[1][1].join(":")}`;
+    availableUsersSelection.addEventListener("change", () => {
+      if (document.getElementById(`openAvailableSingerProfileWindow_${i}`)) {
+        document
+          .getElementById(`openAvailableSingerProfileWindow_${i}`)
+          .remove();
+      }
+
+      const selectedSinger = Array.from(availableUsersSelection.options).filter(
+        (option) => option.selected,
+      );
+
+      const id = selectedSinger[0].id;
+      const selected = eventUsers.users.filter((singer) => singer._id === id);
+
+      buildShiftSingerInformationWindow(
+        serverURL,
+        selected,
+        document.getElementsByClassName("shiftWindows")[0],
+        availableUsersSelection,
+        eventUsers,
+        eventID,
+        eventDate,
+        shiftTime,
+        eventData,
+        currentDate,
+        current,
+        months,
+        weekdays
+      );
+    });
+
+    const singerOption = document.createElement("option");
+    singerOption.innerText = "select singer";
+    availableUsersSelection.append(singerOption);
+
+    const timeLabels = document.createElement("span");
+    timeLabels.className = "timeLabels";
+    timeLabels.innerText = shiftTime;
+    timeLabels.addEventListener("click", function (e) {
+      openShift(sorted[i]);
+    });
+
+    const shiftRow = document.createElement("div");
+    shiftRow.className = "shiftRows";
+
+    shiftRow.append(timeLabels);
+    shiftRow.append(availableUsersSelection);
+    dateContent.append(shiftRow);
 
     const deleteShiftBtn = document.createElement("button");
     deleteShiftBtn.innerText = "X";
@@ -217,26 +256,14 @@ export async function openDate(
         eventID,
       );
     });
+    shiftRow.append(deleteShiftBtn);
 
-    const start = sorted[i];
-    const end = sorted[i];
+    const shiftWindow = document.createElement("div");
+    shiftWindow.className = "shiftWindows";
+    shiftRow.after(shiftWindow);
 
-    const availableUsersSelection = document.createElement("select");
-    availableUsersSelection.id = `availableUsersSelection_${i}`;
-    availableUsersSelection.className = `availableUsersSelectors`;
-    availableUsersSelection.addEventListener(
-      "change",
-      openAvailableSingerProfile,
-    );
-
-    const singerOption = document.createElement("option");
-    singerOption.innerText = "select singer";
-    availableUsersSelection.append(singerOption);
-
-    // console.log("eventUsers: ", eventUsers)
     for (let j = 0; j < eventUsers?.users?.length; j++) {
       const singer = eventUsers.users[j];
-      const eventDate = `${months[calMonth]} ${date}, ${year}`;
 
       if (!singer.events) {
         if (singer.role === "admin") {
@@ -268,133 +295,130 @@ export async function openDate(
         continue;
       }
 
-      // console.log("singer: ", singer);
       const singerEventInformation = singer.events[eventID];
-      const singerEventAvailability = singerEventInformation.availability;
+
       const shiftDayAvailability =
         singerEventInformation.availability[
           `${months[calMonth]} ${date}, ${year}`
         ];
+      const shiftDayPreferences =
+        singerEventInformation.preferences[
+          `${months[calMonth]} ${date}, ${year}`
+        ];
 
-      const shiftAvailabilityObject = {};
-      const shiftPreferredTimesObject = {};
-
-      for (let i = 0; i < 40; i++) {
-        shiftAvailabilityObject[startTimeOptions[i]] =
-          `availabilityCheckbox_${i}`;
-        shiftPreferredTimesObject[startTimeOptions[i]] =
-          `preferredTimeCheckbox_${i}`;
+      let shiftDaySchedules;
+      if (singerEventInformation.schedules) {
+        shiftDaySchedules =
+          singerEventInformation.schedules[
+            `${months[calMonth]} ${date}, ${year}`
+          ];
+      } else {
+        shiftDaySchedules = [];
       }
-
-      const startIndex = startTimeOptions.indexOf(start.time[1][0].join(":")); //sets the starting point within all possible start times for what the shift actually calls for
-      const endIndex = startTimeOptions.indexOf(end.time[1][1].join(":"));
-
       const shiftTimeRange = startTimeOptions.slice(startIndex, endIndex); //contains all shift times, as set by the admin
 
-      // console.log(shiftTimeRange);
+      let availabilityCounter = 0;
+      let preferencesCounter = 0;
 
-      let counter = 0;
-      //! because the singers click boxes that span 1 hour segments, they won't directly line up with the admin's timeslots, which span 15 minutes
-      let availabilityRangeIndex = 0;
-      for (let i = 0; i < shiftTimeRange.length; i++) {
-        if (i > 0 && i % 4 === 0) {
-          availabilityRangeIndex++;
+      let alreadyScheduled = false;
+
+      let shiftKeys = Object.keys(shiftDaySchedules);
+
+      for (let scheduleItem of shiftKeys) {
+        const startTime = scheduleItem.split(" - ")[0];
+        const endTime = scheduleItem.split(" - ")[1];
+
+        if (
+          shiftTimeRange.includes(startTime) ||
+          shiftTimeRange.includes(endTime)
+        ) {
+          alreadyScheduled = true;
         }
-        const shiftTimeSectionNeeded =
-          shiftAvailabilityObject[shiftTimeRange[availabilityRangeIndex]];
-
-        const allSingerShiftAvailability = singerEventAvailability[eventDate];
-        // console.log("==================")
-
-        if (allSingerShiftAvailability[shiftTimeSectionNeeded] === true) {
-          counter++;
+      }
+      for (let i = 0; i < shiftTimeRange.length; i++) {
+        if (shiftDayAvailability[shiftTimeRange[i]]) {
+          availabilityCounter++;
+        }
+        if (shiftDayPreferences[shiftTimeRange[i]]) {
+          preferencesCounter++;
         }
       }
 
-      // console.log("shiftTimeRangeLength: ", shiftTimeRange.length);
-      // console.log("counter: ", counter);
-      // console.log("singer: ",singer.name, "availability: ",singerEventAvailability[eventDate])
-      // console.log("_________________________________")
-      if (counter === shiftTimeRange.length) {
+      if (alreadyScheduled) {
+        if (shiftDaySchedules[shiftTime]) {
+          addSingerToSchedule(
+            serverURL,
+            singer,
+            shiftRow,
+            shiftTime,
+            shiftWindow,
+            eventID,
+            eventDate,
+            eventData,
+            currentDate,
+            current,
+            months,
+            weekdays,
+            eventUsers,
+          );
+        }
+      }
+
+      if (
+        alreadyScheduled === false &&
+        availabilityCounter === shiftTimeRange.length
+      ) {
         const singerOption = document.createElement("option");
         singerOption.id = singer._id;
         let secondaryPart = "";
         if (singer.secondaryPart?.length > 0) {
           secondaryPart = `/${singer.secondaryPart}`;
         }
-        singerOption.innerText = `${singer.name} ${singer.primaryPart}${secondaryPart}`;
+        singerOption.innerText = `${singer.name}: ${singer.primaryPart}${secondaryPart}`;
         availableUsersSelection.append(singerOption);
+        if (preferencesCounter === shiftTimeRange.length) {
+          singerOption.style.color = "green";
+        }
       }
-    }
-
-    const timeLabels = document.createElement("span");
-    timeLabels.className = "timeLabels";
-    timeLabels.innerText = `${sorted[i].time[1][0].join(":")} - ${sorted[
-      i
-    ].time[1][1].join(":")}`;
-    timeLabels.addEventListener("click", function (e) {
-      openShift(sorted[i]);
-    });
-
-    const addToShiftBtn = document.createElement("button");
-    addToShiftBtn.id = `addToShiftBtn_${i}`;
-    addToShiftBtn.className = "addToShiftBtns";
-    addToShiftBtn.innerText = "+";
-
-    const shiftRow = document.createElement("div");
-    shiftRow.className = "shiftRows";
-    shiftRow.append(timeLabels);
-    shiftRow.append(availableUsersSelection);
-    dateContent.append(shiftRow);
-    shiftRow.append(addToShiftBtn);
-    shiftRow.append(deleteShiftBtn);
-
-    const shiftWindow = document.createElement("div");
-    shiftWindow.className = "shiftWindows";
-    shiftRow.after(shiftWindow);
-
-    async function openAvailableSingerProfile(e) {
-      if (document.getElementById(`openAvailableSingerProfileWindow_${i}`)) {
-        document
-          .getElementById(`openAvailableSingerProfileWindow_${i}`)
-          .remove();
-      }
-
-      const selectedSinger = Array.from(availableUsersSelection.options).filter(
-        (option) => option.selected,
-      );
-
-      const id = selectedSinger[0].id;
-      const selected = eventUsers.users.filter((singer) => singer._id === id);
-
-      //todo fix this
-      buildShiftSingerInformationWindow(
-        serverURL,
-        selected,
-        document.getElementsByClassName("shiftWindows")[0],
-      );
     }
   }
 
-  // }
-  /* 
-    When Date Cells are selected, a list of times pops up, with the last option for creating a new time
+  function createStartAndEndTimes() {
+    const startTimeOptions = ["12:00", "12:15", "12:30", "12:45"];
+    const endTimeOptions = ["12:15", "12:30", "12:45"];
+    const quarterHours = ["00", "15", "30", "45"];
+    let j = 1;
+    for (let i = 1; i < 38; i++) {
+      startTimeOptions.push(`${j % 12}:${quarterHours[(i - 1) % 4]}`);
+      endTimeOptions.push(`${j % 12}:${quarterHours[(i - 1) % 4]}`);
+      if (i % 4 === 0) {
+        j++;
+      }
+    }
+    startTimeOptions.pop();
 
-        When the time is selected, groups are listed, with the option of creating a new group.
-                When Groups are selected, members are listed by section, with the option of adding members (when adding a member, select from lists of each voice part)
+    return {
+      startTimeOptions: startTimeOptions,
+      endTimeOptions: endTimeOptions,
+    };
+  }
 
-    
-    create time section: 
-        Select start time, end time,
-        select number of groups
-
-        Show available singers 
-            select from available singers to build schedules
-
-        View in 15 minute increments
-
-        Once confirmed, each selected singer's schedule is updated
-
-
-    */
+  function handleNewTimeEntrySubmitBtnClick() {
+    const startTime = document.getElementById("newStartTimeEntry").value;
+    const endTime = document.getElementById("newEndTimeEntry").value;
+    if (startTime !== "select" && endTime !== "select" && endTime) {
+      createShift(
+        startTime,
+        endTime,
+        currentDate,
+        eventData,
+        serverURL,
+        current,
+        months,
+        weekdays,
+        eventUsers,
+        eventID,
+      );
+    }
+  }
 }
