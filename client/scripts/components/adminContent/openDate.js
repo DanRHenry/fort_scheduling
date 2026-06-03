@@ -14,6 +14,7 @@ export async function openDate(
   eventUsers,
   eventID,
 ) {
+  console.log("eventData: ", eventData);
   // console.log("eventID: ", eventID);
   const month = currentDate.slice(0, 2);
   const date = currentDate.slice(2, 4);
@@ -169,14 +170,17 @@ export async function openDate(
   let startIndex;
   let endIndex;
 
-  const shiftID = `${currentDate}_${startTime}_${endTime}`;
-
   for (let i = 0; i < sorted.length; i++) {
     startTime = sorted[i].time[1][0].join(":");
     endTime = sorted[i].time[1][1].join(":");
 
     start = sorted[i];
     end = sorted[i];
+
+    // console.log("startTime: ", startTime);
+    // console.log("endTime: ", endTime);
+    const shiftID = `${currentDate}_${startTime}_${endTime}`;
+    console.log("shiftID: ", shiftID);
 
     startIndex = startTimeOptions.indexOf(start.time[1][0].join(":")); //sets the starting point within all possible start times for what the shift actually calls for
     endIndex = startTimeOptions.indexOf(end.time[1][1].join(":"));
@@ -215,7 +219,7 @@ export async function openDate(
         currentDate,
         current,
         months,
-        weekdays
+        weekdays,
       );
     });
 
@@ -241,10 +245,11 @@ export async function openDate(
     deleteShiftBtn.innerText = "X";
     deleteShiftBtn.addEventListener("click", (e) => {
       e.preventDefault();
+      console.log("deleting shift");
       deleteShift(
-        startTime,
-        endTime,
-        currentDate,
+        // startTime,
+        // endTime,
+        // currentDate,
         serverURL,
         shiftID,
         eventData,
@@ -267,7 +272,7 @@ export async function openDate(
 
       if (!singer.events) {
         if (singer.role === "admin") {
-          console.log("admin");
+          // console.log("admin");
         } else {
           console.log("no events found");
         }
@@ -275,7 +280,7 @@ export async function openDate(
       }
 
       if (!singer.events[eventID]) {
-        console.log("no eventID found");
+        // console.log("no eventID found");
         continue;
       }
 
@@ -289,9 +294,6 @@ export async function openDate(
       }
 
       if (!singer.events[eventID].availability[eventDate]) {
-        console.log("no shift information found");
-        console.log("eventDate: ", eventDate);
-        console.log(singer.events[eventID].availability);
         continue;
       }
 
@@ -306,35 +308,61 @@ export async function openDate(
           `${months[calMonth]} ${date}, ${year}`
         ];
 
-      let shiftDaySchedules;
+      let shiftDaySchedules = {};
+      let shiftKeys = [];
       if (singerEventInformation.schedules) {
-        shiftDaySchedules =
+        console.log(
+          "singerEventInformation.schedules: ",
+          singerEventInformation.schedules,
+        );
+        console.log(`${months[calMonth]} ${date}, ${year}`);
+        // console.log(singerEventInformation.schedules[
+        //     `${months[calMonth]} ${date}, ${year}`
+        //   ])
+        if (
           singerEventInformation.schedules[
             `${months[calMonth]} ${date}, ${year}`
-          ];
-      } else {
-        shiftDaySchedules = [];
+          ]
+        ) {
+          // console.log("here")
+          shiftDaySchedules =
+            singerEventInformation.schedules[
+              `${months[calMonth]} ${date}, ${year}`
+            ];
+          // console.log("shiftDaySchedules: ", shiftDaySchedules);
+          shiftKeys = Object.keys(shiftDaySchedules);
+        }
       }
-      const shiftTimeRange = startTimeOptions.slice(startIndex, endIndex); //contains all shift times, as set by the admin
+
+      // console.log(endIndex);
+      const shiftTimeRange = startTimeOptions.slice(startIndex, endIndex + 1); //contains all shift times, as set by the admin
 
       let availabilityCounter = 0;
       let preferencesCounter = 0;
 
       let alreadyScheduled = false;
+      console.log("--------------");
 
-      let shiftKeys = Object.keys(shiftDaySchedules);
+      // console.log("shiftKeys: ", shiftKeys);
+      // console.log({shiftKeys})
+      console.log("alreadyScheduled: ", alreadyScheduled);
 
       for (let scheduleItem of shiftKeys) {
-        const startTime = scheduleItem.split(" - ")[0];
-        const endTime = scheduleItem.split(" - ")[1];
+        // console.log("scheduleItem: ", scheduleItem);
 
+        const end = startTimeOptions[startTimeOptions.indexOf(endTime) - 1];
         if (
           shiftTimeRange.includes(startTime) ||
-          shiftTimeRange.includes(endTime)
+          shiftTimeRange.includes(end)
         ) {
+          console.log("shiftTimeRange: ", shiftTimeRange);
+          console.log("start & end: ", startTime, end, "already scheduled");
           alreadyScheduled = true;
         }
       }
+
+      console.log("alreadyScheduled: ", alreadyScheduled);
+
       for (let i = 0; i < shiftTimeRange.length; i++) {
         if (shiftDayAvailability[shiftTimeRange[i]]) {
           availabilityCounter++;
@@ -345,7 +373,12 @@ export async function openDate(
       }
 
       if (alreadyScheduled) {
+        console.log("alreadyScheduled: ", alreadyScheduled);
+        // console.log({singer})
         if (shiftDaySchedules[shiftTime]) {
+          console.log("=====================")
+          // console.log(shiftTime)
+          // console.log(shiftDaySchedules[shiftTime])
           addSingerToSchedule(
             serverURL,
             singer,
@@ -365,9 +398,11 @@ export async function openDate(
       }
 
       if (
-        alreadyScheduled === false &&
+        // alreadyScheduled === false &&
         availabilityCounter === shiftTimeRange.length
       ) {
+                  console.log(".....................")
+
         const singerOption = document.createElement("option");
         singerOption.id = singer._id;
         let secondaryPart = "";
@@ -380,6 +415,7 @@ export async function openDate(
           singerOption.style.color = "green";
         }
       }
+      
     }
   }
 

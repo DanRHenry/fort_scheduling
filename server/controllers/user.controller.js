@@ -156,6 +156,24 @@ router.get("/find", requireValidation, async (req, res) => {
   }
 });
 
+router.get("/findByID:id", requireValidation, async (req, res) => {
+  try{
+    const {id} = req.params
+    const findUser = await User.findOne({ _id: id}) 
+
+    findUser
+      ? res.status(200).json({
+        message: "Found User!",
+        findUser,
+      })
+      : res.status(404).json({
+        message: "User not found",
+      })
+  }catch (err) {
+    console.error(err)
+  }
+})
+
 router.patch("/update:id", requireValidation, async (req, res) => {
   try {
     const { id } = req.params;

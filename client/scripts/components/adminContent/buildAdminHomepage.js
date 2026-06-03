@@ -5,6 +5,15 @@ import { getAllUserData } from "./fetches/getAllUserData.js";
 import { updateUserProfile } from "../userContent/fetches/updateUserProfile.js";
 
 export async function buildAdminHomepage(serverURL, data) {
+  const body = document.querySelector("body");
+    body.replaceChildren();
+
+
+  const adminPageContainer = document.createElement("div")
+  adminPageContainer.id = "adminPageContainer"
+  body.append(adminPageContainer)
+
+
   const allUsers = await getAllUserData(serverURL);
 
   const eventListenerStatusObject = {};
@@ -87,8 +96,6 @@ export async function buildAdminHomepage(serverURL, data) {
     }
   });
 
-  const body = document.querySelector("body");
-  body.replaceChildren();
 
   const startAndEndForm = document.createElement("form");
   startAndEndForm.id = "startAndEndForm";
@@ -173,7 +180,8 @@ export async function buildAdminHomepage(serverURL, data) {
     window.location.reload();
   });
 
-  body.append(logoutBtn, newEventInputForm);
+  adminPageContainer.append(logoutBtn, newEventInputForm);
+
 
   const eventData = await getAllEventsByAdmin(serverURL, sessionStorage.token);
 
@@ -194,16 +202,19 @@ export async function buildAdminHomepage(serverURL, data) {
   eventHeaderLine.append(eventName, eventStartDate, eventEndDate);
   eventTable.append(eventHeaderLine);
 
-  const deleteTable = document.createElement("table");
-  deleteTable.id = "deleteTable";
-  const deleteHeaderRow = document.createElement("tr");
+  // const deleteTable = document.createElement("table");
+  // deleteTable.id = "deleteTable";
+  // const deleteHeaderRow = document.createElement("tr");
   const deleteHeader = document.createElement("th");
   deleteHeader.innerText = "Delete";
 
-  deleteHeaderRow.append(deleteHeader);
-  deleteTable.append(deleteHeaderRow);
+  eventHeaderLine.append(deleteHeader)
 
-  body.append(eventTable, deleteTable);
+  // deleteHeaderRow.append(deleteHeader);
+  // deleteTable.append(deleteHeaderRow);
+
+  adminPageContainer.append(eventTable)
+  // , deleteTable);
 
   for (let i = 0; i < eventData.events.length; i++) {
     const event = eventData.events[i];

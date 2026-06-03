@@ -1,6 +1,7 @@
 import { getPhoto } from "../userContent/fetches/getPhoto.js";
-import { updateUserProfile } from "../userContent/fetches/updateUserProfile.js"
+import { updateUserProfile } from "../userContent/fetches/updateUserProfile.js";
 import { openDate } from "./openDate.js";
+import { getSinger } from "./fetches/getSinger.js";
 
 export async function buildShiftSingerInformationWindow(
   serverURL,
@@ -15,16 +16,16 @@ export async function buildShiftSingerInformationWindow(
   currentDate,
   current,
   months,
-  weekdays
+  weekdays,
 ) {
-  console.log(eventSingers)
+  console.log(eventSingers);
   while (locationToAppend.firstChild) {
     locationToAppend.removeChild(locationToAppend.firstChild);
   }
 
   for (let i = 0; i < eventSingers.length; i++) {
     let singer = eventSingers[i];
-    console.log("singer: ", singer)
+    console.log("singer: ", singer);
     if (!singer.imgURL) {
       return;
     }
@@ -52,12 +53,10 @@ export async function buildShiftSingerInformationWindow(
     }
 
     const shiftSingerInformationPane = document.createElement("div");
-    // shiftSingerInformationPane.className = false;
 
     shiftSingerInformationPane.className = "shiftSingerInformationPanes";
     shiftSingerInformationPane.id = `shift_singerInformationPane_${i}`;
     shiftSingerInformationPane.style.display = "none";
-    // shiftSingerInformationPane.style.border = "1px solid black";
 
     const showMoreBtn = document.createElement("div");
     showMoreBtn.innerText = "show more";
@@ -132,133 +131,102 @@ export async function buildShiftSingerInformationWindow(
       secondaryPart.innerText = `Secondary Voice: ${singer.secondaryPart}`;
     }
 
-    const adminNotes = document.createElement("div");
-    adminNotes.id = `adminNotes_${i}`;
-    adminNotes.className = "adminNotes";
-    if (singer.adminNotes?.length > 0) {
-      adminNotes.innerText = singer.adminNotes;
-    } else {
-      adminNotes.innerText = "";
-    }
-    const adminNotesLabel = document.createElement("label");
-    adminNotesLabel.innerText = "Admin Notes: ";
-    adminNotesLabel.id = `adminNotesLabel_${i}`;
-    adminNotesLabel.className = "adminNotesLabels";
-    adminNotesLabel.setAttribute("for", adminNotes.id);
+    let adminNotesLabel;
 
-    adminNotes.addEventListener("click", function (e) {
-      let input;
-      input = document.createElement("textarea");
-      input.value = e.target.innerText;
-      input.className = "adminNotesInputs";
-      input.id = `adminNotesInput_${e.target.id.split("_")[1]}`;
-      console.log("converting admin notes to input");
-      eventListenerStatusObject.adminNotes = {
-        userDataID: singer._id,
-        inputID: input.id,
-        adminNotesID: e.target.id,
-        adminNotesLabelID: adminNotesLabel.id,
-      };
-      e.target.before(input);
-      e.target.remove();
+    buildAdminNotesSection();
+
+    const selectGroup = document.createElement("div");
+    selectGroup.className = "selectGroup";
+
+    const red = document.createElement("input");
+    red.type = "radio";
+    red.name = "redGroupButton";
+    const redLabel = document.createElement("label");
+    redLabel.innerText = "red";
+    redLabel.setAttribute("for", "redGroupButton");
+    red.checked = true;
+    red.addEventListener("change", () => {
+      green.checked = false;
     });
 
-    adminNotesLabel.append(adminNotes);
-
-    shiftSingerInformationPane.append(
-      cellNum,
-      emailAddress,
-      singerAddress,
-      primaryPart,
-      secondaryPart,
-      defaultLeadership,
-      bioSectionLabel,
-    );
-
-    const selectGroup = document.createElement("div")
-    selectGroup.className = "selectGroup"
-
-    const red = document.createElement("input")
-    red.type = "radio"
-    red.name = "redGroupButton"
-    const redLabel = document.createElement("label")
-    redLabel.innerText = "red"
-    redLabel.setAttribute("for", "redGroupButton")
-    red.checked = true
-    red.addEventListener("change", () => {
-      green.checked = false
-    })
-    
-    const green = document.createElement('input')
-    green.type = "radio"
-    green.name = "greenGroupButton"
+    const green = document.createElement("input");
+    green.type = "radio";
+    green.name = "greenGroupButton";
     green.addEventListener("change", () => {
-      red.checked = false
-    })
+      red.checked = false;
+    });
 
-    const greenLabel = document.createElement("label")
-    greenLabel.innerText = "green"
-    green.setAttribute("for", "greenGroupButton")
-    
-  const addToShiftBtn = document.createElement("button");
+    const greenLabel = document.createElement("label");
+    greenLabel.innerText = "green";
+    green.setAttribute("for", "greenGroupButton");
+
+    const addToShiftBtn = document.createElement("button");
     addToShiftBtn.id = `addToShiftBtn_${i}`;
     addToShiftBtn.className = "addToShiftBtns";
     addToShiftBtn.innerText = "+";
     addToShiftBtn.addEventListener("click", function () {
-      const parent = this.parentNode
-      // console.log(parent.children)
-      const green = parent.children[2].children[3].checked
+      const parent = this.parentNode;
+      const green = parent.children[2].children[3].checked;
 
-      let group
+      let group;
       if (green === true) {
-        group = "green"
+        group = "green";
+      } else {
+        group = "red";
       }
-      else {
-        group = "red"
-      }
 
-
-      const selectedSinger = Array.from(availableUsersSelection.options).filter(option => option.selected)
-      const singerID = selectedSinger[0].id
-      const singer = eventUsers.users.filter(singer => singer._id === singerID)[0]
-      console.log(singer.events)
-
-      // console.log("singerID: ", singerID)
+      const selectedSinger = Array.from(availableUsersSelection.options).filter(
+        (option) => option.selected,
+      );
+      const singerID = selectedSinger[0].id;
+      const singer = eventUsers.users.filter(
+        (singer) => singer._id === singerID,
+      )[0];
 
       const leader = false;
-      const shiftEvent = singer.events[eventID]
-
-      const shiftInfo = {[eventTimeLabel]: {part: selectVoice.value, group: group, leader: leader}}
-      // console.log("group: ", group)
+      const shiftEvent = singer.events[eventID];
+      const shiftInfo = {
+        part: selectVoice.value,
+        group: group,
+        leader: leader,
+      };
+      console.log("shiftEvent: ",shiftEvent)
+      console.log("shiftInfo: ",shiftInfo)
+      console.log("eventDate: ",eventDate)
+      console.log("eventTimeLabel: ",eventTimeLabel)
       if (!shiftEvent.schedules) {
-        shiftEvent.schedules = {
-          [eventDate]: shiftInfo
+        if (!shiftEvent.schedules[eventDate]) {
+
+          shiftEvent.schedules = {
+            [eventDate]: shiftInfo,
+          };
         }
       } else {
-        shiftEvent.schedules[eventDate] = shiftInfo
+        if (!shiftEvent.schedules) {
+          shiftEvent.schedules = {[eventDate]: eventTimeLabel}
+        }
+        console.log(shiftEvent.schedules)
+        shiftEvent.schedules[eventDate] = {[eventTimeLabel]: shiftInfo};
       }
 
-      singer.events[eventID] = shiftEvent
+      singer.events[eventID] = shiftEvent;
 
-      // console.log(singer.events)
-      // console.log(eventID)
+      const updateObject = { events: { [eventID]: singer.events[eventID] } };
 
-      const updateObject = {events: {[eventID]: singer.events[eventID]}}
-      // console.log(updateObject)
-      updateUserProfile(serverURL, singerID, updateObject)
-          openDate(
-            serverURL,
-            eventData,
-            currentDate,
-            current,
-            months,
-            weekdays,
-            eventUsers,
-            eventID,
-          )
+      updateUserProfile(serverURL, singerID, updateObject);
+      openDate(
+        serverURL,
+        eventData,
+        currentDate,
+        current,
+        months,
+        weekdays,
+        eventUsers,
+        eventID,
+      );
     });
 
-    selectGroup.append(redLabel, red, greenLabel, green)
+    selectGroup.append(redLabel, red, greenLabel, green);
 
     singerRow.append(singerName, selectVoice, selectGroup, addToShiftBtn);
     locationToAppend.append(singerRow);
@@ -268,8 +236,8 @@ export async function buildShiftSingerInformationWindow(
     const singerProfilePicture = document.createElement("img");
     singerProfilePicture.src = profilePhoto;
     singerProfilePicture.alt = "singer profile picture";
-    singerProfilePicture.style.display = "none"
-    singerProfilePicture.className = "singerProfilePictures"
+    singerProfilePicture.style.display = "none";
+    singerProfilePicture.className = "singerProfilePictures";
 
     const singerInformationSection = document.createElement("div");
     singerInformationSection.className = "shiftSingerInformationSections";
@@ -283,41 +251,124 @@ export async function buildShiftSingerInformationWindow(
     const toggleShiftSingerInformationPane = document.createElement("div");
     toggleShiftSingerInformationPane.className =
       "toggleShiftSingerInformationPanes";
-      toggleShiftSingerInformationPane.innerText = "show more"
+    toggleShiftSingerInformationPane.innerText = "show more";
 
     toggleShiftSingerInformationPane.addEventListener("click", function () {
       const image = this.parentNode.children[2].children[1].children[0];
       if (shiftSingerInformationPane.style.display === "initial") {
         shiftSingerInformationPane.style.display = "none";
         image.style.display = "none";
-        this.innerText = "show more"
+        this.parentNode.children[3].style.display = "none";
+
+        this.innerText = "show more";
       } else {
         shiftSingerInformationPane.style.display = "initial";
         image.style.display = "initial";
-        this.innerText = "hide"
+        this.parentNode.children[3].style.display = "initial";
+        this.innerText = "hide";
       }
     });
-    const singerInfo = document.createElement("div")
-    singerInfo.className = "singerInfo"
+    const singerInfo = document.createElement("div");
+    singerInfo.className = "singerInfo";
 
-    const left = document.createElement("div")
-    left.append(shiftSingerInformationPane)
-    const right = document.createElement("div")
-    singerInfo.append(left, right)
-    right.append(singerProfilePicture)
+    const left = document.createElement("div");
+    left.append(shiftSingerInformationPane);
+    const right = document.createElement("div");
+    singerInfo.append(left, right);
+    right.append(singerProfilePicture);
     locationToAppend.append(
       toggleShiftSingerInformationPane,
       singerInfo,
       adminNotesLabel,
     );
-    // locationToAppend.append(singerInformationSection);
 
     singerName.addEventListener("click", () => {
       let shiftSingerInformationSections = document.getElementsByClassName(
         `shiftSingerInformationSections`,
       );
-      console.log(singerName)
-      console.log(shiftSingerInformationSections)
+      console.log(singerName);
+      console.log(shiftSingerInformationSections);
     });
+
+    function buildAdminNotesSection(updatedText) {
+      const adminNotes = document.createElement("div");
+      adminNotes.id = `adminNotes_${i}`;
+      adminNotes.className = "adminNotes";
+
+      if (updatedText?.length > 0) {
+        console.log("1: ", updatedText);
+        adminNotes.innerText = updatedText;
+      } else if (singer.adminNotes[0]?.length > 0) {
+        console.log("2: ", singer.adminNotes);
+        adminNotes.innerText = singer.adminNotes;
+      } else {
+        console.log("3");
+        adminNotes.innerText = "click to edit";
+      }
+      adminNotesLabel = document.createElement("label");
+      adminNotesLabel.innerText = "Admin Notes: ";
+      adminNotesLabel.id = `adminNotesLabel_${i}`;
+      adminNotesLabel.className = "adminNotesLabels";
+      adminNotesLabel.setAttribute("for", adminNotes.id);
+
+      adminNotes.addEventListener("click", function (e) {
+        console.log("click");
+        let input = document.createElement("textarea");
+        input.value = this.innerText;
+        input.className = "adminNotesInputs";
+        input.id = `adminNotesInput_${e.target.id.split("_")[1]}`;
+
+        const submitBtn = document.createElement("button");
+        submitBtn.innerText = "submit";
+
+        submitBtn.addEventListener("click", async function (e) {
+          let updatedText;
+          if (input.value.length > 0) {
+            updatedText = input.value;
+          } else {
+            updatedText = "";
+          }
+          updateUserProfile(serverURL, singer._id, {
+            adminNotes: [updatedText],
+          });
+          adminNotesLabel.remove();
+          input.remove();
+          submitBtn.remove();
+          console.log("rebuilding with: ", updatedText);
+          singer.adminNotes = [updatedText];
+          buildAdminNotesSection(updatedText);
+          if (
+            document.getElementById(`openAvailableSingerProfileWindow_${i}`)
+          ) {
+            document
+              .getElementById(`openAvailableSingerProfileWindow_${i}`)
+              .remove();
+          }
+        });
+        this.before(input);
+        this.before(submitBtn);
+        this.remove();
+
+        if (input.value === "click to edit") {
+          input.value = "";
+        }
+        input.focus();
+      });
+
+      adminNotesLabel.append(adminNotes);
+
+      shiftSingerInformationPane.append(
+        cellNum,
+        emailAddress,
+        singerAddress,
+        primaryPart,
+        secondaryPart,
+        defaultLeadership,
+        bioSectionLabel,
+      );
+      if (document.getElementById(`shift_singerInformationPane_${i}`)) {
+        locationToAppend.append(adminNotesLabel);
+      }
+    }
   }
 }

@@ -3,9 +3,9 @@ import { openDate } from "../openDate.js";
 import { getShiftData } from "./getShiftData.js";
 
 export async function deleteShift(
-  startTime,
-  endTime,
-  date,
+  // startTime,
+  // endTime,
+  // date,
   serverURL,
   shiftID,
   eventData,
@@ -14,10 +14,14 @@ export async function deleteShift(
   months,
   weekdays,
   eventUsers,
-  eventID
+  eventID,
 ) {
-  try {    
-    const eventID = eventData.events[0]._id;
+  try {
+    //todo look into and/or clean up remaining scheduled singers after scheduled times are deleted. this will probably affect the total hours, unless dealt with - maybe loop through the event users and update them before deletion
+
+    // const eventID = eventData.events[0]._id;
+    console.log("------------------------");
+    console.log(eventID, shiftID);
 
     const URL = `${serverURL}/events/removeshift/${eventID}/${shiftID}`;
 
@@ -36,13 +40,13 @@ export async function deleteShift(
       console.log("deleted shift entry :)");
       console.log(data);
 
-    let updatedData = eventData.events[0]
-    updatedData.dailySchedules = data.updateEventRecord.dailySchedules
+      let updatedData = eventData.events[0];
+      updatedData.dailySchedules = data.updateEventRecord.dailySchedules;
 
-    let updatedEvent = eventData
-    updatedEvent.events[0] = updatedData
+      let updatedEvent = eventData;
+      updatedEvent.events[0] = updatedData;
 
-    console.log(updatedEvent)
+      console.log(updatedEvent);
       openDate(
         serverURL,
         updatedEvent,
@@ -51,10 +55,10 @@ export async function deleteShift(
         months,
         weekdays,
         eventUsers,
-        eventID
+        eventID,
       );
     }
-    // console.log(data);
+    console.log(data);
   } catch (err) {
     console.error(err);
   }

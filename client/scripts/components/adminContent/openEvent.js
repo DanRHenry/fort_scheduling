@@ -182,7 +182,7 @@ buildSingerInformationWindow(serverURL,eventSingers, allEventSingersListSection)
 
   eventWindow.append(eventHeader, allEventSingersListSection, calendar);
 
-  document.getElementsByTagName("body")[0].append(eventWindow);
+  document.getElementById("adminPageContainer").append(eventWindow)
 
   function padDateElement(element) {
     if (element.toString().length < 2) {

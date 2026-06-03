@@ -8,5 +8,8 @@
     "mongoose": "^9.0.1",
     "multer": "^2.0.2",
     "nodemon": "^3.1.11"
+  },
+  "scripts": {
+    "start": "nodemon app.js"
   }
 }

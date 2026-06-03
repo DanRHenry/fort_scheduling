@@ -15,24 +15,22 @@ export async function buildSingerInformationWindow(serverURL, eventSingers,locat
     singerName.innerText = singer.name;
     singerName.className = "singerNames";
 
-    const selectVoice = document.createElement("select");
-    selectVoice.id = `${singer._id}_select_voice`;
-
+    const voiceParts = document.createElement("div")
+    voiceParts.className = "voiceParts"
+    
     if (singer.primaryPart) {
-      const primaryOption = document.createElement("option");
-      primaryOption.innerText = singer.primaryPart;
-      selectVoice.append(primaryOption);
+      const voicePart = document.createElement("div")
+      voicePart.innerText = singer.primaryPart
+          if (singer.secondaryPart) {
+      voicePart.innerText += `/${singer.secondaryPart}`
+    }
+      voiceParts.append(voicePart)
     }
 
-    if (singer.secondaryPart) {
-      const secondaryOption = document.createElement("option");
-      secondaryOption.innerText = singer.secondaryPart;
-      selectVoice.append(secondaryOption);
-    }
+
     const singerInformationPane = document.createElement("div");
     singerInformationPane.className = false;
     singerInformationPane.id = `singerInformationPane_${i}`;
-    // singerInformationPane.style.border = "1px solid black";
 
     const showMoreBtn = document.createElement("div");
     showMoreBtn.innerText = "show more";
@@ -108,38 +106,38 @@ export async function buildSingerInformationWindow(serverURL, eventSingers,locat
     }
 
 
-    const adminNotes = document.createElement("div");
-    adminNotes.id = `adminNotes_${i}`;
-    adminNotes.className = "adminNotes";
-    if (singer.adminNotes?.length > 0) {
-      adminNotes.innerText = singer.adminNotes;
-    } else {
-      adminNotes.innerText = "";
-    }
-    const adminNotesLabel = document.createElement("label");
-    adminNotesLabel.innerText = "Admin Notes: ";
-    adminNotesLabel.id = `adminNotesLabel_${i}`;
-    adminNotesLabel.className = "adminNotesLabels"
-    adminNotesLabel.setAttribute("for", adminNotes.id)
+    // const adminNotes = document.createElement("div");
+    // adminNotes.id = `adminNotes_${i}`;
+    // adminNotes.className = "adminNotes";
+    // if (singer.adminNotes?.length > 0) {
+    //   adminNotes.innerText = singer.adminNotes;
+    // } else {
+    //   adminNotes.innerText = "";
+    // }
+    // const adminNotesLabel = document.createElement("label");
+    // adminNotesLabel.innerText = "Admin Notes: ";
+    // adminNotesLabel.id = `adminNotesLabel_${i}`;
+    // adminNotesLabel.className = "adminNotesLabels"
+    // adminNotesLabel.setAttribute("for", adminNotes.id)
 
-    adminNotes.addEventListener("click", function (e) {
-      let input;
-      input = document.createElement("textarea");
-      input.value = e.target.innerText;
-      input.className = "adminNotesInputs";
-      input.id = `adminNotesInput_${e.target.id.split("_")[1]}`;
-      console.log("converting admin notes to input");
-      eventListenerStatusObject.adminNotes = {
-        userDataID: singer._id,
-        inputID: input.id,
-        adminNotesID: e.target.id,
-        adminNotesLabelID: adminNotesLabel.id,
-      };
-      e.target.before(input);
-      e.target.remove();
-    });
+    // adminNotes.addEventListener("click", function (e) {
+    //   let input;
+    //   input = document.createElement("textarea");
+    //   input.value = e.target.innerText;
+    //   input.className = "adminNotesInputs";
+    //   input.id = `adminNotesInput_${e.target.id.split("_")[1]}`;
+    //   console.log("converting admin notes to input");
+    //   eventListenerStatusObject.adminNotes = {
+    //     userDataID: singer._id,
+    //     inputID: input.id,
+    //     adminNotesID: e.target.id,
+    //     adminNotesLabelID: adminNotesLabel.id,
+    //   };
+    //   e.target.before(input);
+    //   e.target.remove();
+    // });
 
-    adminNotesLabel.append(adminNotes);
+    // adminNotesLabel.append(adminNotes);
 
     singerInformationPane.append(
       cellNum,
@@ -150,7 +148,11 @@ export async function buildSingerInformationWindow(serverURL, eventSingers,locat
       defaultLeadership,
       bioSectionLabel,
     );
-    singerRow.append(singerName, selectVoice);
+    singerRow.append(
+      singerName, 
+      voiceParts
+      // selectVoice
+    );
     locationToAppend.append(singerRow);
 
     const profilePhoto = await getPhoto(serverURL, singer.imgURL, singer._id);
@@ -165,7 +167,7 @@ export async function buildSingerInformationWindow(serverURL, eventSingers,locat
     singerInformationSection.append(
       singerInformationPane,
       singerProfilePicture,
-      adminNotesLabel
+      // adminNotesLabel
     );
 
     locationToAppend.append(singerInformationSection);

@@ -23,9 +23,9 @@ export function buildEvent(event, eventData, serverURL, allUsers, eventListenerS
 
   eventRow.addEventListener("click", handleOpenEvent);
 
-  const deleteRow = document.createElement("tr");
-  deleteRow.className = "deleteRows";
-  deleteRow.id = `delete_${event._id}`;
+  // const deleteRow = document.createElement("tr");
+  // deleteRow.className = "deleteRows";
+  // deleteRow.id = `delete_${event._id}`;
   const deleteButton = document.createElement("button");
   deleteButton.innerText = "X";
   deleteButton.addEventListener("click", handleDeleteEvent);
@@ -37,8 +37,9 @@ export function buildEvent(event, eventData, serverURL, allUsers, eventListenerS
         deleteEvent(serverURL, event);
       }
     }
-  }
-  deleteRow.append(deleteButton);
+  } 
+  eventRow.append(deleteButton)
+  // deleteRow.append(deleteButton);
 
   function handleOpenEvent() {
 
@@ -59,5 +60,5 @@ export function buildEvent(event, eventData, serverURL, allUsers, eventListenerS
   }
 
   document.getElementById("eventTable").append(eventRow);
-  document.getElementById("deleteTable").append(deleteRow);
+  document.getElementById("deleteTable")?.append(deleteRow);
 }
