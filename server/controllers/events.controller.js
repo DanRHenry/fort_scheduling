@@ -107,6 +107,12 @@ router.patch("/update:id", async (req, res) => {
     const { id } = req.params;
     const updateInfo = req.body;
 
+    let all = updateInfo.all
+
+    delete updateInfo.all
+
+    console.log("all: ", all)
+    console.log("updateInfo: ",updateInfo)
     const record = await Events.findOne({ _id: id });
     if (!record) {
       res.status(404).json({

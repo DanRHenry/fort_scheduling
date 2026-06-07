@@ -13,6 +13,7 @@ export async function openDate(
   weekdays,
   eventUsers,
   eventID,
+  selectedBlockDate,
 ) {
   console.log("eventData: ", eventData);
   // console.log("eventID: ", eventID);
@@ -52,8 +53,9 @@ export async function openDate(
   const newShiftEntryRow = document.createElement("tr");
   newShiftEntryRow.id = "newShiftEntryRow";
 
-  const newStartTimeEntryLabel = document.createElement("td");
+  const newStartTimeEntryLabel = document.createElement("label");
   newStartTimeEntryLabel.innerText = "Start: ";
+  newStartTimeEntryLabel.setAttribute("for", "newStartTimeEntry");
 
   const newStartTimeEntry = document.createElement("select");
   newStartTimeEntry.id = "newStartTimeEntry";
@@ -73,7 +75,8 @@ export async function openDate(
     }
   });
 
-  const newEndTimeEntryLabel = document.createElement("td");
+  const newEndTimeEntryLabel = document.createElement("label");
+  newEndTimeEntryLabel.setAttribute("for", "newEndTimeEntry");
   newEndTimeEntryLabel.innerText = "End: ";
 
   const newEndTimeEntry = document.createElement("select");
@@ -82,6 +85,10 @@ export async function openDate(
   const endTimeOption = document.createElement("option");
   newEndTimeEntry.append(endTimeOption);
 
+  const newTimeEntrySubmitBtnLabel = document.createElement("label");
+  newTimeEntrySubmitBtnLabel.setAttribute("for", "newTimeEntrySubmitBtn");
+  newTimeEntrySubmitBtnLabel.innerText = "Add";
+
   const newTimeEntrySubmitBtn = document.createElement("button");
   newTimeEntrySubmitBtn.innerText = "+";
   newTimeEntrySubmitBtn.id = "newTimeEntrySubmitBtn";
@@ -89,6 +96,21 @@ export async function openDate(
     "click",
     handleNewTimeEntrySubmitBtnClick,
   );
+
+  const newTimeEntryAddToAllDatesBtnLabel = document.createElement("label");
+  newTimeEntryAddToAllDatesBtnLabel.setAttribute(
+    "for",
+    "newTimeEntryAddToAllDatesBtn",
+  );
+  newTimeEntryAddToAllDatesBtnLabel.innerText = "Add to All Dates";
+
+  const newTimeEntryAddToAllDatesBtn = document.createElement("button");
+  newTimeEntryAddToAllDatesBtn.id = "newTimeEntryAddToAllDatesBtn";
+  newTimeEntryAddToAllDatesBtn.addEventListener(
+    "click",
+    handleAddNewTimeToAllDatesSubmitBtnClick,
+  );
+  newTimeEntryAddToAllDatesBtn.innerText = "+++";
 
   for (let i = 0; i < startTimeOptions.length; i++) {
     const startTimeOption = document.createElement("option");
@@ -101,16 +123,37 @@ export async function openDate(
     newStartTimeEntry.append(startTimeOption);
   }
 
-  newShiftEntryRow.append(
-    newStartTimeEntryLabel,
-    newStartTimeEntry,
-    newEndTimeEntryLabel,
-    newEndTimeEntry,
+  const startTimeTD = document.createElement("td");
+  startTimeTD.append(newStartTimeEntryLabel, newStartTimeEntry);
+
+  const endTimeTD = document.createElement("td");
+  endTimeTD.append(newEndTimeEntryLabel, newEndTimeEntry);
+
+  const newTimeEntrySubmitTD = document.createElement("td");
+  newTimeEntrySubmitTD.append(
+    newTimeEntrySubmitBtnLabel,
     newTimeEntrySubmitBtn,
   );
 
+  const newTimeSetAllSubmitTD = document.createElement("td");
+  newTimeSetAllSubmitTD.append(
+    newTimeEntryAddToAllDatesBtnLabel,
+    newTimeEntryAddToAllDatesBtn,
+  );
+
+  newShiftEntryRow.append(
+    startTimeTD,
+    endTimeTD,
+    newTimeEntrySubmitTD,
+    newTimeSetAllSubmitTD,
+  );
+
   shiftTableHeaderRow.append(timeHeader);
-  dateContent.append(newShiftEntryRow);
+
+  const newShiftEntryRowHeader = document.createElement("h2");
+  newShiftEntryRowHeader.innerText = "Create New Shift";
+
+  dateContent.append(newShiftEntryRowHeader, newShiftEntryRow);
 
   //! Build Event Header
 
@@ -124,8 +167,22 @@ export async function openDate(
 
   dateWindow.append(dateContentHeader, dateContent);
 
-  document.querySelector("body").append(dateWindow);
+  const dateWindowBackground = document.createElement("div");
+  dateWindowBackground.id = "dateWindowBackground";
 
+  dateWindowBackground.append(dateWindow);
+  document.querySelector("body").append(dateWindowBackground);
+  dateWindowBackground.addEventListener("click", (e) => {
+    console.log(e.target);
+    if (e.target.id === "dateWindowBackground") {
+      dateWindow.remove();
+      dateWindowBackground.remove();
+    }
+  });
+
+      const shiftRowsSectionHeader = document.createElement("h2");
+    shiftRowsSectionHeader.innerText = "Shifts";
+  dateContent.append(shiftRowsSectionHeader)
   console.log("shifts: ", shifts);
   let sorted = [];
   for (let i = 0; i < shifts.length; i++) {
@@ -206,6 +263,7 @@ export async function openDate(
       const id = selectedSinger[0].id;
       const selected = eventUsers.users.filter((singer) => singer._id === id);
 
+      console.log(selected);
       buildShiftSingerInformationWindow(
         serverURL,
         selected,
@@ -234,12 +292,18 @@ export async function openDate(
       openShift(sorted[i]);
     });
 
+    const shiftRowsSection = document.createElement("div");
+    shiftRowsSection.id = "shiftRowsSection";
+
     const shiftRow = document.createElement("div");
     shiftRow.className = "shiftRows";
 
     shiftRow.append(timeLabels);
     shiftRow.append(availableUsersSelection);
-    dateContent.append(shiftRow);
+
+    shiftRowsSection.append(shiftRow);
+
+    dateContent.append(shiftRowsSection);
 
     const deleteShiftBtn = document.createElement("button");
     deleteShiftBtn.innerText = "X";
@@ -376,7 +440,7 @@ export async function openDate(
         console.log("alreadyScheduled: ", alreadyScheduled);
         // console.log({singer})
         if (shiftDaySchedules[shiftTime]) {
-          console.log("=====================")
+          console.log("=====================");
           // console.log(shiftTime)
           // console.log(shiftDaySchedules[shiftTime])
           addSingerToSchedule(
@@ -401,7 +465,7 @@ export async function openDate(
         // alreadyScheduled === false &&
         availabilityCounter === shiftTimeRange.length
       ) {
-                  console.log(".....................")
+        console.log(".....................");
 
         const singerOption = document.createElement("option");
         singerOption.id = singer._id;
@@ -415,7 +479,6 @@ export async function openDate(
           singerOption.style.color = "green";
         }
       }
-      
     }
   }
 
@@ -454,6 +517,28 @@ export async function openDate(
         weekdays,
         eventUsers,
         eventID,
+        false,
+      );
+    }
+  }
+
+  function handleAddNewTimeToAllDatesSubmitBtnClick() {
+    console.log("clicked add to all dates");
+    const startTime = document.getElementById("newStartTimeEntry").value;
+    const endTime = document.getElementById("newEndTimeEntry").value;
+    if (startTime !== "select" && endTime !== "select" && endTime) {
+      createShift(
+        startTime,
+        endTime,
+        currentDate,
+        eventData,
+        serverURL,
+        current,
+        months,
+        weekdays,
+        eventUsers,
+        eventID,
+        true,
       );
     }
   }

@@ -124,7 +124,7 @@ export async function openEvent(
             months,
             weekdays,
             allUsers,
-            eventID
+            eventID,
           );
         });
       } else {
@@ -172,7 +172,7 @@ export async function openEvent(
     }
   }
 
-buildSingerInformationWindow(serverURL,eventSingers, allEventSingersListSection)
+buildSingerInformationWindow(serverURL,eventSingers, allEventSingersListSection, eventID)
 
   const eventHeader = document.createElement("div");
   eventHeader.innerText = event.name;

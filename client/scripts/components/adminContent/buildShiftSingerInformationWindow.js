@@ -33,6 +33,8 @@ export async function buildShiftSingerInformationWindow(
     singerRow.className = "shiftSingerRows";
     singerRow.id = `shiftSingerRow_${i}`;
 
+    console.log(singer)
+
     const singerName = document.createElement("div");
     singerName.innerText = singer.name;
     singerName.className = "singerNames";
@@ -147,6 +149,8 @@ export async function buildShiftSingerInformationWindow(
     red.checked = true;
     red.addEventListener("change", () => {
       green.checked = false;
+      singerName.style.backgroundColor = "red";
+      singerName.style.color = "white"
     });
 
     const green = document.createElement("input");
@@ -154,6 +158,8 @@ export async function buildShiftSingerInformationWindow(
     green.name = "greenGroupButton";
     green.addEventListener("change", () => {
       red.checked = false;
+      singerName.style.backgroundColor = "green"
+            singerName.style.color = "white"
     });
 
     const greenLabel = document.createElement("label");
@@ -166,6 +172,7 @@ export async function buildShiftSingerInformationWindow(
     addToShiftBtn.innerText = "+";
     addToShiftBtn.addEventListener("click", function () {
       const parent = this.parentNode;
+      // console.log(parent.children[2].children[3].checked)
       const green = parent.children[2].children[3].checked;
 
       let group;
@@ -195,12 +202,12 @@ export async function buildShiftSingerInformationWindow(
       console.log("eventDate: ",eventDate)
       console.log("eventTimeLabel: ",eventTimeLabel)
       if (!shiftEvent.schedules) {
-        if (!shiftEvent.schedules[eventDate]) {
-
+        shiftEvent.schedules = {}
+      }
+      if (!shiftEvent.schedules && !shiftEvent.schedules[eventDate]) {
           shiftEvent.schedules = {
             [eventDate]: shiftInfo,
           };
-        }
       } else {
         if (!shiftEvent.schedules) {
           shiftEvent.schedules = {[eventDate]: eventTimeLabel}

@@ -1,6 +1,6 @@
 import { getPhoto } from "../userContent/fetches/getPhoto.js";
 
-export async function buildSingerInformationWindow(serverURL, eventSingers,locationToAppend) {
+export async function buildSingerInformationWindow(serverURL, eventSingers,locationToAppend, eventID) {
 
   // console.log("serverURL: ",serverURL)
   // console.log("eventSingers: ",eventSingers)
@@ -10,6 +10,10 @@ export async function buildSingerInformationWindow(serverURL, eventSingers,locat
     const singerRow = document.createElement("div");
     singerRow.className = "singerRows";
     singerRow.id = `singerRow_${i}`;
+    console.log(eventSingers[i])
+
+    console.log(singer.events[eventID].schedules)
+    console.log(singerRow.id)
 
     const singerName = document.createElement("div");
     singerName.innerText = singer.name;

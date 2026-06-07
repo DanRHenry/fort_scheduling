@@ -150,6 +150,7 @@ export async function buildAdminHomepage(serverURL, data) {
     });
   });
 
+
   const newEventInputForm = document.createElement("div");
   newEventInputForm.id = "newEventInputForm";
 
@@ -180,7 +181,18 @@ export async function buildAdminHomepage(serverURL, data) {
     window.location.reload();
   });
 
-  adminPageContainer.append(logoutBtn, newEventInputForm);
+
+  const newEventSection = document.createElement("div")
+  newEventSection.id = "newEventSection"
+
+  const newEventSectionHeader = document.createElement("h2")
+
+  newEventSectionHeader.innerText = "Create New Event"
+  newEventSection.append(newEventSectionHeader)
+
+  newEventSection.append(newEventInputForm)
+
+  adminPageContainer.append(logoutBtn, newEventSection);
 
 
   const eventData = await getAllEventsByAdmin(serverURL, sessionStorage.token);
@@ -213,7 +225,15 @@ export async function buildAdminHomepage(serverURL, data) {
   // deleteHeaderRow.append(deleteHeader);
   // deleteTable.append(deleteHeaderRow);
 
-  adminPageContainer.append(eventTable)
+  const eventTableSection = document.createElement("div")
+  eventTableSection.id = "eventTableSection"
+
+  const eventTableSectionTitle = document.createElement("h2")
+  eventTableSectionTitle.innerText = "Select an Event"
+
+  eventTableSection.append(eventTableSectionTitle,eventTable)
+
+  adminPageContainer.append(eventTableSection)
   // , deleteTable);
 
   for (let i = 0; i < eventData.events.length; i++) {
